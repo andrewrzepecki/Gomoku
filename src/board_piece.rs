@@ -2,7 +2,7 @@ use druid::widget::prelude::*;
 use druid::{Size, EventCtx, Data, Color, Point};
 use crate::{UNPLAYED_STATE, PLAYER1_STATE, PLAYER2_STATE};
 use crate::game_data::AppState;
-use crate::game_rules::is_legal;
+use crate::game_rules::{is_legal, check_capture};
 use druid::kurbo::Circle;
 
 #[derive(Clone, Data)]
@@ -38,11 +38,11 @@ impl Widget<AppState> for BoardPiece {
             if (self.position - event.pos).hypot() <= self.radius {
                 // Unplayed Check
                 if is_legal(&data.board, self.x, self.y, data.turn) {
+                    if check_capture(&mut data.board, self.x, self.y, data.turn) {
+                        data.captures[(data.turn - 1) as usize] += 2;
+                    }
                     data.board[self.x as usize][self.y as usize] = data.turn;
                     data.turn = if data.turn == PLAYER1_STATE {PLAYER2_STATE} else {PLAYER1_STATE};
-                    //for n in get_neighbours(self.x, self.y) {
-                    //    data.board[n.0 as usize][n.1 as usize] = data.turn;
-                    //}
                 }
                 println!("x:{}   y:{}", self.x, self.y);
             }

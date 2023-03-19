@@ -3,7 +3,7 @@ use druid::{im::Vector, kurbo::Line, Point, Size, Color};
 
 use crate::board_piece::BoardPiece;
 use crate::game_data::AppState;
-
+use crate::{PLAYER1_STATE, PLAYER2_STATE};
 
 
 pub struct Board {
@@ -26,6 +26,7 @@ impl Widget<AppState> for Board {
         for p in self.pieces.iter_mut() {
             p.event(ctx, event, data, env);
         }
+        //check_rules(data);
         ctx.request_paint();
     }
 
@@ -45,6 +46,7 @@ impl Widget<AppState> for Board {
         for p in self.pieces.iter_mut() {
             p.update(ctx, old_data, data, env);
         }
+       
     }
 
     fn layout(
