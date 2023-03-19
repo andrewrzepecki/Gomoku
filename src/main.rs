@@ -1,20 +1,19 @@
-use druid::{AppLauncher, Widget, LocalizedString, WindowDesc, im::Vector, widget::{Button, Flex, Label, Align}, Size, Point, WidgetExt};
-mod GameData;
-mod BoardPiece;
-mod Board;
-use GameData::AppState;
-use crate::BoardPiece::BoardPiece as OBoardPiece;
-use crate::Board::Board as OBoard;
-/*
-*Data
-*UI Builder
-*Main
-*/
+mod board;
+mod board_piece;
+mod game_data;
+mod game_rules;
+mod utils;
 
-const BOARDSIZE : i32 = 15;
-const UNPLAYED_STATE : i32 = 0;
-const PLAYER1_STATE : i32 = 1;
-const PLAYER2_STATE : i32 = 2;
+use game_data::AppState;
+use board_piece::BoardPiece;
+use board::Board;
+use druid::{AppLauncher, Widget, LocalizedString, WindowDesc, im::Vector, widget::{Flex, Label, Align}, Point};
+
+
+const BOARDSIZE : i32 = 19;
+pub const UNPLAYED_STATE : i32 = 0;
+pub const PLAYER1_STATE : i32 = 1;
+pub const PLAYER2_STATE : i32 = 2;
 
 pub fn main() {
     let mut board = Vec::new();
@@ -31,6 +30,7 @@ pub fn main() {
         board_size : BOARDSIZE,
         turn : 1,
         board : board,
+        captures : vec![0,0],
     };
     AppLauncher::with_window(window)
         .log_to_console()
@@ -43,9 +43,9 @@ fn build_widget() -> impl Widget<AppState> {
     let mut pieces = Vector::new();
     for x in 0..BOARDSIZE {
         for y in 0..BOARDSIZE {
-            let mut point = Point::new(0.0, 0.0);
-            let mut radius = 40.0;
-            let piece: OBoardPiece = OBoardPiece::new(
+            let point = Point::new(0.0, 0.0);
+            let radius = 40.0;
+            let piece: BoardPiece = BoardPiece::new(
                 x,
                 y,
                 point,
@@ -57,7 +57,7 @@ fn build_widget() -> impl Widget<AppState> {
     }
     let col = Flex::column()
         .with_flex_child(Label::new("Gomoku"), 0.2)
-        .with_flex_child(Align::centered(OBoard::new(pieces)), 1.0);
+        .with_flex_child(Align::centered(Board::new(pieces)), 1.0);
 
     col
 }

@@ -8,4 +8,6 @@ pub struct AppState {
     pub turn : i32,
     #[data(eq)]
     pub board : Vec<Vec<i32>>,
+    #[data(eq)]
+    pub captures : Vec<i32>,
 }
