@@ -78,9 +78,7 @@ fn is_double_three(board : &Vec<Vec<i32>>, x : i32, y : i32, player : i32) -> bo
                                 s_count += 1;
                             }
                             if s_count == 3 && b_count == 1 {
-                                println!("Inside deep");
                                 if p3 == UNPLAYED_STATE {
-                                    println!("Finished in blank");
                                     doubles += 1;
                                 }
                                 else if p3 == player {
@@ -103,7 +101,6 @@ fn is_double_three(board : &Vec<Vec<i32>>, x : i32, y : i32, player : i32) -> bo
     if doubles > 2 {
         return true;
     }
-    println!("Doubles {}", doubles);
     return false;
 }
 
