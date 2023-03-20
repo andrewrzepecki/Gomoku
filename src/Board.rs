@@ -3,7 +3,6 @@ use druid::{im::Vector, kurbo::Line, Point, Size, Color};
 
 use crate::board_piece::BoardPiece;
 use crate::game_data::AppState;
-use crate::{PLAYER1_STATE, PLAYER2_STATE};
 
 
 pub struct Board {
