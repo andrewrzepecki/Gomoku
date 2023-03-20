@@ -2,7 +2,7 @@ use druid::widget::prelude::*;
 use druid::{Size, EventCtx, Data, Color, Point};
 use crate::{UNPLAYED_STATE, PLAYER1_STATE, PLAYER2_STATE};
 use crate::game_data::AppState;
-use crate::game_rules::{is_legal, check_capture};
+use crate::game_rules::{is_legal, check_capture, is_winner};
 use druid::kurbo::Circle;
 
 #[derive(Clone, Data)]
@@ -41,10 +41,12 @@ impl Widget<AppState> for BoardPiece {
                     if check_capture(&mut data.board, self.x, self.y, data.turn) {
                         data.captures[(data.turn - 1) as usize] += 2;
                     }
+                    if is_winner(&mut data.board, self.x, self.y, data.turn) {
+                        data.winner = data.turn;
+                    }
                     data.board[self.x as usize][self.y as usize] = data.turn;
                     data.turn = if data.turn == PLAYER1_STATE {PLAYER2_STATE} else {PLAYER1_STATE};
                 }
-                println!("x:{}   y:{}", self.x, self.y);
             }
         }
     }

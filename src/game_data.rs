@@ -10,4 +10,5 @@ pub struct AppState {
     pub board : Vec<Vec<i32>>,
     #[data(eq)]
     pub captures : Vec<i32>,
+    pub winner : i32,
 }

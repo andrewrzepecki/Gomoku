@@ -22,6 +22,14 @@ pub struct Board {
 // but a general rule is to just pass it through unless you really know you don't want it.
 impl Widget<AppState> for Board {
     fn event(&mut self, ctx: &mut EventCtx, event: &Event, data: &mut AppState, env : &Env) {
+        if data.turn == 2 {
+            // Add AI here if Player 2 is AI.
+            //data.board[][] = model.play(board);
+            //println!("Player 2 turn");
+        }
+        if data.winner != 0 {
+            println!("Player {} wins !", data.winner);
+        }
         for p in self.pieces.iter_mut() {
             p.event(ctx, event, data, env);
         }

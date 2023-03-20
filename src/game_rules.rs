@@ -111,12 +111,47 @@ pub fn is_legal(board : &Vec<Vec<i32>>, x : i32, y : i32, player : i32) -> bool 
         return false;
     }
     if is_illegal_capture(board, x, y, player) {
+        println!("Illegal Capture!");
         return false;
     }
     if is_double_three(board, x, y, player) {
+        println!("Illegal Double Three!");
         return false;
     }
     return true;
+}
+
+pub fn is_winner(board : &mut Vec<Vec<i32>>, x : i32, y : i32, player : i32) -> bool {
+    let size = board[0].len() as i32;
+    for n in get_neighbours(x, y, size) {
+        if board[n.0 as usize][n.1 as usize] == player {
+            let mut same_count = 2;
+            for i in 2..size {
+                let x_sym = x + ((n.0 - x) * i);
+                let y_sym = y + ((n.1 - y) * i);
+                if is_valid_coords(x_sym, y_sym, size) {
+                    if board[x_sym as usize][y_sym as usize] != player {
+                        break;
+                    }
+                    same_count += 1;
+                }
+            }
+            for i in 1..size {
+                let x_sym = x + ((n.0 - x) * -i);
+                let y_sym = y + ((n.1 - y) * -i);
+                if is_valid_coords(x_sym, y_sym, size) {
+                    if board[x_sym as usize][y_sym as usize] != player {
+                        break;
+                    }
+                    same_count += 1;
+                }
+            }
+            if same_count > 4 {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 pub fn check_capture(board : &mut Vec<Vec<i32>>, x : i32, y : i32, player : i32) -> bool {

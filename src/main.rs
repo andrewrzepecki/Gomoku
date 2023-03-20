@@ -31,6 +31,7 @@ pub fn main() {
         turn : 1,
         board : board,
         captures : vec![0,0],
+        winner : 0,
     };
     AppLauncher::with_window(window)
         .log_to_console()
@@ -58,6 +59,5 @@ fn build_widget() -> impl Widget<AppState> {
     let col = Flex::column()
         .with_flex_child(Label::new("Gomoku"), 0.2)
         .with_flex_child(Align::centered(Board::new(pieces)), 1.0);
-
     col
 }
