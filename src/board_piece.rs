@@ -4,6 +4,7 @@ use crate::{UNPLAYED_STATE, PLAYER1_STATE, PLAYER2_STATE};
 use crate::game_data::AppState;
 use crate::game_rules::{is_legal, check_capture, is_winner};
 use druid::kurbo::Circle;
+use std::time::Instant;
 
 #[derive(Clone, Data)]
 pub struct BoardPiece {
@@ -46,6 +47,7 @@ impl Widget<AppState> for BoardPiece {
                     }
                     data.board[self.x as usize][self.y as usize] = data.turn;
                     data.turn = if data.turn == PLAYER1_STATE {PLAYER2_STATE} else {PLAYER1_STATE};
+                    data.last_move_time = Instant::now();
                 }
             }
         }
@@ -96,7 +98,7 @@ impl Widget<AppState> for BoardPiece {
         self.position = Point::new(x, y);
         let mut color = Color::TRANSPARENT;
         if self.state != UNPLAYED_STATE {
-            color = if self.state == PLAYER1_STATE {Color::BLACK} else {Color::WHITE};
+            color = if self.state == PLAYER1_STATE {data.colors[data.player1_color as usize]} else {data.colors[data.player2_color as usize]};
         }
         ctx.fill(Circle::new(self.position, self.radius), &color);
     }

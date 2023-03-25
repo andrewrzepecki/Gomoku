@@ -1,4 +1,3 @@
-
 use crate::{UNPLAYED_STATE, PLAYER1_STATE, PLAYER2_STATE,
             utils::{get_neighbours, is_valid_coords}};
 

@@ -681,7 +681,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "gomoku_druid"
+name = "gomoku"
 version = "0.1.0"
 dependencies = [
  "druid",
