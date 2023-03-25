@@ -47,6 +47,7 @@ impl Widget<AppState> for BoardPiece {
                     }
                     data.board[self.x as usize][self.y as usize] = data.turn;
                     data.turn = if data.turn == PLAYER1_STATE {PLAYER2_STATE} else {PLAYER1_STATE};
+                    data.last_move_duration = Instant::now().duration_since(data.last_move_time);
                     data.last_move_time = Instant::now();
                 }
             }

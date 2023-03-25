@@ -1,5 +1,5 @@
 use druid::{Data, Lens, Color};
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 #[derive(Clone, Data, Lens)]
 pub struct AppState {
@@ -18,6 +18,6 @@ pub struct AppState {
     pub colors : Vec<Color>,
     #[data(eq)]
     pub color_names : Vec<String>,
-    #[lens(name = "time")]
+    pub last_move_duration : Duration,
     pub last_move_time : Instant,
 }

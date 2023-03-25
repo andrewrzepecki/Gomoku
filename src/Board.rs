@@ -1,7 +1,9 @@
+use druid::{LocalizedString, WindowDesc};
 use druid::widget::prelude::*;
 use druid::{im::Vector, kurbo::Line, Point, Size, Color};
 
 use crate::board_piece::BoardPiece;
+use crate::builder::build_winner;
 use crate::game_data::AppState;
 
 
@@ -28,8 +30,14 @@ impl Widget<AppState> for Board {
             //println!("Player 2 turn");
         }
         if data.winner != 0 {
-            println!("Player {} wins !", data.winner);
-        }
+            ctx.window().close();
+            let window = WindowDesc::new(build_winner())
+                .title(LocalizedString::new("Game Over"))
+                .resizable(false)
+                .window_size(Size::new(600.0, 450.0)
+            );
+            ctx.new_window(window);
+            }
         for p in self.pieces.iter_mut() {
             p.event(ctx, event, data, env);
         }
