@@ -72,7 +72,7 @@ impl AppState {
         self.board = build_board(self.board_size);
         self.turn = PLAYER1_STATE;
         self.captures = Vec::from([0,0]);
-        self.winner = 0;
+        self.winner = UNPLAYED_STATE;
         self.last_move_duration = Instant::now().duration_since(Instant::now());
         self.last_move_time = Instant::now();
         self.is_ai = Vec::from([if self.game_mode == "AIvAI" {true} else {false}, if self.game_mode == "PvP" {false} else {true}]);

@@ -28,7 +28,8 @@ impl Widget<AppState> for Board {
         }
         // Place Piece on board if player is AI.
         if data.is_ai[(data.turn - 1) as usize] {
-            let _move = alpha_beta_negamax(&mut data.board, data.turn, 10, 0, 0);
+            println!("Running algo");
+            let _move = alpha_beta_negamax(&mut data.board, data.turn, DEPTH, std::i32::MIN + 2, std::i32::MAX - 2);
             update_board(data, _move.0, _move.1);
         }
         if data.winner != UNPLAYED_STATE {
@@ -138,7 +139,8 @@ pub fn update_board(data: &mut AppState, x: i32, y: i32) {
     data.board[x as usize][y as usize] = data.turn;
     data.turn = if data.turn == PLAYER1_STATE {PLAYER2_STATE} else {PLAYER1_STATE};
     if !data.is_ai[(data.turn - 1) as usize] && data.game_mode == "PvP" {
-        let ai_move = alpha_beta_negamax(&mut data.board, data.turn, 10, 0, 0);
+        println!("Running algo");
+        let ai_move = alpha_beta_negamax(&mut data.board, data.turn, DEPTH, std::i32::MIN + 2, std::i32::MAX - 2);
         data.sugested = Some((ai_move.0, ai_move.1));
     } 
     data.last_move_duration = Instant::now().duration_since(data.last_move_time);

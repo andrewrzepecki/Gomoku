@@ -109,11 +109,9 @@ pub fn is_legal(board : &Vec<Vec<i32>>, x : i32, y : i32, player : i32) -> bool 
         return false;
     }
     if is_illegal_capture(board, x, y, player) {
-        println!("Illegal Capture!");
         return false;
     }
     if is_double_three(board, x, y, player) {
-        println!("Illegal Double Three!");
         return false;
     }
     return true;
