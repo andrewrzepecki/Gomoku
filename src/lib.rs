@@ -10,7 +10,7 @@ pub mod negamax;
 pub use game_data::AppState;
 pub use board::Board;
 pub use board_piece::BoardPiece;
-pub use builder::{build_menu, build_winner};
+pub use builder::{build_menu, build_winner, build_pieces, build_board};
 pub use game_rules::{is_legal, is_winner, check_capture};
 pub use negamax::alpha_beta_negamax;
 pub use utils::{get_neighbours, is_valid_coords};

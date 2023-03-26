@@ -58,9 +58,7 @@ pub fn build_menu() -> impl Widget<AppState> {
     let play_button = Flex::row()
         .with_flex_child(Button::new("PLAY")
             .on_click(|ctx, data: &mut AppState, _| {
-                let pieces = build_pieces(data.board_size);
-                data.board = build_board(data.board_size);
-                data.is_ai = Vec::from([if data.game_mode == "AIvAI" {true} else {false}, if data.game_mode == "PvP" {false} else {true}]);
+                let pieces = data.reset();
                 ctx.window().close();
                 let game_window = WindowDesc::new(build_game(pieces)).title(LocalizedString::new("Gomoku"));
                 ctx.new_window(game_window);
@@ -128,27 +126,46 @@ pub fn build_winner() -> impl Widget<AppState> {
     let play_again_button = Button::new("Play Again")
         .on_click(
             |ctx, data: &mut AppState, _| {
-                //reset board & captures
-                let pieces = build_pieces(data.board_size);
-                data.board = build_board(data.board_size);
-                data.turn = PLAYER1_STATE;
-                data.captures = Vec::from([0,0]);
-                data.winner = 0;
-                data.last_move_duration = Instant::now().duration_since(Instant::now());
-                data.last_move_time = Instant::now();
+                // Reset AppState & launch new window.
+                let pieces = data.reset();
                 ctx.window().close();
                 let game_window = WindowDesc::new(build_game(pieces)).title(LocalizedString::new("Gomoku"));
                 ctx.new_window(game_window);
             }
         );
+
+        let settings_button = Button::new("Settings")
+            .on_click(
+            |ctx, data: &mut AppState, _| {
+                // Reset AppState & launch new window.
+                let pieces = data.reset();
+                ctx.window().close();
+                let settings_window = WindowDesc::new(build_menu())
+                    .title(LocalizedString::new("Gomoku Settings"))
+                    .resizable(false)
+                    .window_size(Size::new(600.0, 450.0)
+                );
+                ctx.new_window(settings_window);
+            }
+        );
+        let exit_button = Button::new("Exit")
+            .on_click(
+            |ctx, _: &mut AppState, _| {
+                ctx.window().close();
+            }
+        );
+    
     
     let col = Flex::column()
-        .with_flex_child(winner_label, 0.3)
-        .with_flex_child(play_again_button, 1.0);
+        .with_flex_spacer(3.0)
+        .with_flex_child(winner_label, 1.5)
+        .with_flex_child(play_again_button, 1.0)
+        .with_flex_child(settings_button, 1.0)
+        .with_flex_child(exit_button, 1.0);
     col
 }
 
-fn build_pieces(size : i32) -> Vector<BoardPiece> {
+pub fn build_pieces(size : i32) -> Vector<BoardPiece> {
     
     let mut pieces = Vector::new();
     
@@ -169,7 +186,7 @@ fn build_pieces(size : i32) -> Vector<BoardPiece> {
     pieces
 }
 
-fn build_board(size : i32) -> Vec<Vec<i32>> {
+pub fn build_board(size : i32) -> Vec<Vec<i32>> {
 
     let mut board = Vec::new();
 
