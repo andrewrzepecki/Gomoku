@@ -4,8 +4,9 @@ pub mod game_data;
 pub mod game_rules;
 pub mod utils;
 pub mod builder;
+pub mod negamax;
 
-// Gomoku imports
+// Gomoku imports for main
 pub use game_data::AppState;
 pub use board::Board;
 pub use board_piece::BoardPiece;

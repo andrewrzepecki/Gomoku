@@ -20,4 +20,6 @@ pub struct AppState {
     pub color_names : Vec<String>,
     pub last_move_duration : Duration,
     pub last_move_time : Instant,
+    #[data(eq)]
+    pub is_ai : Vec<bool>,
 }

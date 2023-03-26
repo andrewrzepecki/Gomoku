@@ -73,6 +73,7 @@ pub fn build_menu() -> impl Widget<AppState> {
             .on_click(|ctx, data: &mut AppState, _| {
                 let pieces = build_pieces(data.board_size);
                 data.board = build_board(data.board_size);
+                data.is_ai = Vec::from([if data.game_mode == "AIvAI" {true} else {false}, if data.game_mode == "PvP" {false} else {true}]);
                 ctx.window().close();
                 let game_window = WindowDesc::new(build_game(pieces)).title(LocalizedString::new("Gomoku"));
                 ctx.new_window(game_window);

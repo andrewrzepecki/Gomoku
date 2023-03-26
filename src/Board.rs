@@ -1,11 +1,15 @@
+use std::time::Instant;
+
 use druid::{LocalizedString, WindowDesc};
 use druid::widget::prelude::*;
 use druid::{im::Vector, kurbo::Line, Point, Size, Color};
 
+use crate::game_rules::{is_winner, check_capture};
+use crate::{PLAYER1_STATE, PLAYER2_STATE, UNPLAYED_STATE};
 use crate::board_piece::BoardPiece;
 use crate::builder::build_winner;
 use crate::game_data::AppState;
-
+use crate::negamax::alpha_beta_negamax;
 
 pub struct Board {
     pieces : Vector<BoardPiece>,
@@ -24,12 +28,20 @@ pub struct Board {
 // but a general rule is to just pass it through unless you really know you don't want it.
 impl Widget<AppState> for Board {
     fn event(&mut self, ctx: &mut EventCtx, event: &Event, data: &mut AppState, env : &Env) {
-        if data.turn == 2 {
-            // Add AI here if Player 2 is AI.
-            //data.board[][] = model.play(board);
-            //println!("Player 2 turn");
+        if data.is_ai[(data.turn - 1) as usize] {
+            let _move = alpha_beta_negamax(&mut data.board, data.turn, 10, 0, 0);
+            if check_capture(&mut data.board, _move.0, _move.1, data.turn) {
+                data.captures[(data.turn - 1) as usize] += 2;
+            }
+            if is_winner(&mut data.board, _move.0, _move.1, data.turn) {
+                data.winner = data.turn;
+            }
+            data.board[_move.0 as usize][_move.1 as usize] = data.turn;
+            data.turn = if data.turn == PLAYER1_STATE {PLAYER2_STATE} else {PLAYER1_STATE};
+            data.last_move_duration = Instant::now().duration_since(data.last_move_time);
+            data.last_move_time = Instant::now();
         }
-        if data.winner != 0 {
+        if data.winner != UNPLAYED_STATE {
             ctx.window().close();
             let window = WindowDesc::new(build_winner())
                 .title(LocalizedString::new("Game Over"))
@@ -71,21 +83,13 @@ impl Widget<AppState> for Board {
         data: &AppState,
         env: &Env,
     ) -> Size {
-        // BoxConstraints are passed by the parent widget.
-        // This method can return any Size within those constraints:
-        // bc.constrain(my_size)
-        //
-        // To check if a dimension is infinite or not (e.g. scrolling):
-        // bc.is_width_bounded() / bc.is_height_bounded()
-        //
-        // bx.max() returns the maximum size of the widget. Be careful
-        // using this, since always make sure the widget is bounded.
-        // If bx.max() is used in a scrolling widget things will probably
-        // not work correctly.
+        
         for p in self.pieces.iter_mut() {
             p.layout(layout_ctx, bc, data, env);
         }
+        
         let mut size = bc.max();
+        
         if size.height != size.width {
             size = Size::new(size.height, size.height);
         }

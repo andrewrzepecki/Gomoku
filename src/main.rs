@@ -38,6 +38,7 @@ pub fn main() {
         ),
         last_move_duration : Instant::now().duration_since(Instant::now()),
         last_move_time : Instant::now(),
+        is_ai : Vec::from([false, false]),
     };
     
     let window = WindowDesc::new(build_menu())
