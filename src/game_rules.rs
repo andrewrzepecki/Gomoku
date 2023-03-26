@@ -1,5 +1,4 @@
 use crate::*;
-use crate::utils::{get_neighbours, is_valid_coords};
 
 
 fn is_illegal_capture(board : &Vec<Vec<i32>>, x :i32, y: i32, player : i32) -> bool {

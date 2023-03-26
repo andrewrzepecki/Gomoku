@@ -11,8 +11,9 @@ pub use game_data::AppState;
 pub use board::Board;
 pub use board_piece::BoardPiece;
 pub use builder::{build_menu, build_winner};
-use crate::game_rules::{is_legal, is_winner, check_capture};
+pub use game_rules::{is_legal, is_winner, check_capture};
 pub use negamax::alpha_beta_negamax;
+pub use utils::{get_neighbours, is_valid_coords};
 
 // Druid 0.8.3 imports
 pub use druid::{AppLauncher, LocalizedString, WindowDesc, Color, im::Vector, kurbo::Line, Point, Size, Data, EventCtx, Lens, Insets};
