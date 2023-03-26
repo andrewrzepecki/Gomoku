@@ -3,7 +3,7 @@ use crate::*;
 pub fn build_menu() -> impl Widget<AppState> {
     
     // Create Board Size Picker
-    let board_size_label = Label::new("Board Size:").with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE));
+    let board_size_label = Label::new(format!("{:width$}","Board Size", width=20)).with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE));
     let board_size_value = Label::new(|data: &AppState, _env: &Env| data.board_size.to_string()).with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE));
     let board_size_up_button = Button::new("+")
         .on_click(|_ctx, data: &mut AppState, _env: &Env| { data.board_size = (data.board_size + 1).clamp(15, 30) });
@@ -16,7 +16,7 @@ pub fn build_menu() -> impl Widget<AppState> {
         .with_flex_child(board_size_up_button, 1.0);
 
     // Create Game Mode picker.
-    let game_mode_label = Label::new("Game Mode:").with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE));
+    let game_mode_label = Label::new(format!("{:width$}","Game Mode", width=20)).with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE));
     let game_mode_value = Label::new(|data: &AppState, _env: &Env|{format!("{}", data.game_mode)}).with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE));
     let game_mode_up_button = Button::new("+")
         .on_click(|_ctx, data: &mut AppState, _env| if data.game_mode == "PvP" {data.game_mode = "PvAI".into();} else if data.game_mode == "PvAI" {data.game_mode = "AIvAI".into();} else {data.game_mode = "PvP".into();});
@@ -29,7 +29,7 @@ pub fn build_menu() -> impl Widget<AppState> {
         .with_flex_child(game_mode_up_button, 1.0);
 
     // Create Player 1 color picker.
-    let player1_color_label: Label<AppState> = Label::new("Player 1 Color").with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE));
+    let player1_color_label: Label<AppState> = Label::new(format!("{:width$}","Player 1 Color", width=20)).with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE));
     let player1_color_value = Label::new(|data: &AppState, _: &Env| data.color_names[data.player1_color as usize].to_string()).with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE));
     let player1_color_up_button = Button::new("+")
         .on_click(|_ctx, data: &mut AppState, _env: &Env| { data.player1_color = (data.player1_color + 1).clamp(0, (data.colors.len() - 1) as i32) });
@@ -42,7 +42,7 @@ pub fn build_menu() -> impl Widget<AppState> {
         .with_flex_child(player1_color_up_button, 1.0);
 
     // Create Player 2 color picker.
-    let player2_color_label: Label<AppState> = Label::new("Player 2 Color").with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE));
+    let player2_color_label: Label<AppState> = Label::new(format!("{:width$}","Player 2 Color", width=20)).with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE));
     let player2_color_value = Label::new(|data: &AppState, _: &Env| data.color_names[data.player2_color as usize].to_string()).with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE));
     let player2_color_up_button = Button::new("+")
         .on_click(|_ctx, data: &mut AppState, _env: &Env| { data.player2_color = (data.player2_color + 1).clamp(0, (data.colors.len() - 1)as i32) });
@@ -136,9 +136,8 @@ pub fn build_winner() -> impl Widget<AppState> {
 
         let settings_button = Button::new("Settings")
             .on_click(
-            |ctx, data: &mut AppState, _| {
+            |ctx, _: &mut AppState, _| {
                 // Reset AppState & launch new window.
-                let pieces = data.reset();
                 ctx.window().close();
                 let settings_window = WindowDesc::new(build_menu())
                     .title(LocalizedString::new("Gomoku Settings"))

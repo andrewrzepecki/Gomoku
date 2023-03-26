@@ -24,6 +24,8 @@ impl BoardPiece {
 }
 
 impl Widget<AppState> for BoardPiece {
+    
+    // Main Event Handler for User Moves.
     fn event(&mut self,
         _ctx: &mut EventCtx,
         event: &Event,
@@ -32,18 +34,8 @@ impl Widget<AppState> for BoardPiece {
     ) {
         if let Event::MouseDown(event) = event {
             if (self.position - event.pos).hypot() <= self.radius {
-                // Unplayed Check
                 if is_legal(&data.board, self.x, self.y, data.turn) {
-                    if check_capture(&mut data.board, self.x, self.y, data.turn) {
-                        data.captures[(data.turn - 1) as usize] += 2;
-                    }
-                    if is_winner(&mut data.board, self.x, self.y, data.turn) {
-                        data.winner = data.turn;
-                    }
-                    data.board[self.x as usize][self.y as usize] = data.turn;
-                    data.turn = if data.turn == PLAYER1_STATE {PLAYER2_STATE} else {PLAYER1_STATE};
-                    data.last_move_duration = Instant::now().duration_since(data.last_move_time);
-                    data.last_move_time = Instant::now();
+                    update_board(data, self.x, self.y);
                 }
             }
         }
@@ -78,24 +70,33 @@ impl Widget<AppState> for BoardPiece {
         bc.max()
     } 
 
-    // The paint method gets called last, after an event flow.
-    // It goes event -> update -> layout -> paint, and each method can influence the next.
-    // Basically, anything that changes the appearance of a widget causes a paint.
     fn paint(&mut self, 
         ctx: &mut PaintCtx,
         data: &AppState,
-        _env: &Env
+        _env: &Env,
     ) {
         let x_delta = ctx.size().width / data.board_size as f64;
         let y_delta = ctx.size().height / data.board_size as f64;
         let x = x_delta * (self.x as f64) + (x_delta / 2.0);
         let y = y_delta * (self.y as f64) + (y_delta / 2.0);
-        self.radius = (x_delta + y_delta) / 2.0 / 4.0;
+        self.radius = (x_delta + y_delta) / 2.0 / 3.0;
         self.position = Point::new(x, y);
-        let mut color = Color::TRANSPARENT;
-        if self.state != UNPLAYED_STATE {
-            color = if self.state == PLAYER1_STATE {data.colors[data.player1_color as usize]} else {data.colors[data.player2_color as usize]};
-        }
+        let color = get_piece_color(&data, self.x, self.y, self.state);
         ctx.fill(Circle::new(self.position, self.radius), &color);
     }
+}
+
+// Function to set color of the piece depeding on the AppState.
+fn get_piece_color(data : &AppState, x: i32, y: i32, state: i32) -> Color {
+    let mut color = Color::TRANSPARENT;
+    if state != UNPLAYED_STATE {
+        color = if state == PLAYER1_STATE {data.colors[data.player1_color as usize]} else {data.colors[data.player2_color as usize]};
+    }
+    else {
+        color = if !is_legal(&data.board, x, y, data.turn) {Color::rgba8(255, 0, 0, 50)} else {color};
+        if data.sugested != None {
+            color = if data.sugested.unwrap().0 == x && data.sugested.unwrap().1 == y {Color::rgba8(0, 255, 0, 50)} else {color};
+        }
+    }
+    color  
 }

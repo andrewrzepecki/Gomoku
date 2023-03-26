@@ -17,7 +17,7 @@ pub fn alpha_beta_negamax(board: &mut Vec<Vec<i32>>, player: i32, depth: i32, mu
                 board[x][y] = player;
                 
                 // Evaluate the move recursively
-                let (_, _, score) = alpha_beta_negamax(board, if player == 1 {2} else {1}, depth - 1, -beta, -alpha);
+                let (_, _, score) = alpha_beta_negamax(board, if player == PLAYER1_STATE {PLAYER2_STATE} else {PLAYER1_STATE}, depth - 1, -beta, -alpha);
                 let score = -score;
                 
                 // Undo the move

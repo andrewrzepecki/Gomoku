@@ -21,6 +21,7 @@ pub struct AppState {
     pub last_move_time : Instant,
     #[data(eq)]
     pub is_ai : Vec<bool>,
+    pub sugested : Option<(i32, i32)>,
 }
 
 impl Default for AppState {
@@ -60,6 +61,7 @@ impl Default for AppState {
             last_move_duration : Instant::now().duration_since(Instant::now()),
             last_move_time : Instant::now(),
             is_ai : Vec::from([false, false]),
+            sugested : None,
         }
     }
 }
@@ -74,6 +76,7 @@ impl AppState {
         self.last_move_duration = Instant::now().duration_since(Instant::now());
         self.last_move_time = Instant::now();
         self.is_ai = Vec::from([if self.game_mode == "AIvAI" {true} else {false}, if self.game_mode == "PvP" {false} else {true}]);
+        self.sugested = None;
         pieces
     }
 }

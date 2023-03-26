@@ -12,20 +12,24 @@ pub struct Board {
     }
  }
 
+/*
+    Main Board Interface Widget. 
+*/
 impl Widget<AppState> for Board {
+    
+    // Main Event Handler for all game changes.
     fn event(&mut self, ctx: &mut EventCtx, event: &Event, data: &mut AppState, env : &Env) {
+        
+        // Give Control to player if User.
+        for p in self.pieces.iter_mut() {
+            if !data.is_ai[(data.turn - 1) as usize] && data.winner == UNPLAYED_STATE {
+                p.event(ctx, event, data, env);
+            }
+        }
+        // Place Piece on board if player is AI.
         if data.is_ai[(data.turn - 1) as usize] {
             let _move = alpha_beta_negamax(&mut data.board, data.turn, 10, 0, 0);
-            if check_capture(&mut data.board, _move.0, _move.1, data.turn) {
-                data.captures[(data.turn - 1) as usize] += 2;
-            }
-            if is_winner(&mut data.board, _move.0, _move.1, data.turn) {
-                data.winner = data.turn;
-            }
-            data.board[_move.0 as usize][_move.1 as usize] = data.turn;
-            data.turn = if data.turn == PLAYER1_STATE {PLAYER2_STATE} else {PLAYER1_STATE};
-            data.last_move_duration = Instant::now().duration_since(data.last_move_time);
-            data.last_move_time = Instant::now();
+            update_board(data, _move.0, _move.1);
         }
         if data.winner != UNPLAYED_STATE {
             ctx.window().close();
@@ -36,10 +40,6 @@ impl Widget<AppState> for Board {
             );
             ctx.new_window(window);
             }
-        for p in self.pieces.iter_mut() {
-            p.event(ctx, event, data, env);
-        }
-        //check_rules(data);
         ctx.request_paint();
     }
 
@@ -55,11 +55,15 @@ impl Widget<AppState> for Board {
         }
     }
 
-    fn update(&mut self, ctx: &mut UpdateCtx, old_data: &AppState, data: &AppState, env: &Env) {
+    fn update(&mut self,
+        ctx: &mut UpdateCtx,
+        old_data: &AppState,
+        data: &AppState,
+        env: &Env
+    ) {
         for p in self.pieces.iter_mut() {
             p.update(ctx, old_data, data, env);
         }
-       
     }
 
     fn layout(
@@ -122,4 +126,21 @@ impl Widget<AppState> for Board {
         }
 
     }
+}
+
+pub fn update_board(data: &mut AppState, x: i32, y: i32) {
+    if check_capture(&mut data.board, x, y, data.turn) {
+        data.captures[(data.turn - 1) as usize] += 2;
+    }
+    if is_winner(&mut data.board, x, y, data.turn) {
+        data.winner = data.turn;
+    }
+    data.board[x as usize][y as usize] = data.turn;
+    data.turn = if data.turn == PLAYER1_STATE {PLAYER2_STATE} else {PLAYER1_STATE};
+    if !data.is_ai[(data.turn - 1) as usize] && data.game_mode == "PvP" {
+        let ai_move = alpha_beta_negamax(&mut data.board, data.turn, 10, 0, 0);
+        data.sugested = Some((ai_move.0, ai_move.1));
+    } 
+    data.last_move_duration = Instant::now().duration_since(data.last_move_time);
+    data.last_move_time = Instant::now();
 }
