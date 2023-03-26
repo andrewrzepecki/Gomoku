@@ -1,5 +1,4 @@
-use crate::game_rules::is_legal;
-
+use crate::*;
 
 pub fn alpha_beta_negamax(board: &mut Vec<Vec<i32>>, player: i32, depth: i32, mut alpha: i32, beta: i32) -> (i32, i32, i32) {
     let mut best_pos: Option<(i32, i32)> = None;

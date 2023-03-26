@@ -1,15 +1,4 @@
-use std::time::Instant;
-
-use druid::{LocalizedString, WindowDesc};
-use druid::widget::prelude::*;
-use druid::{im::Vector, kurbo::Line, Point, Size, Color};
-
-use crate::game_rules::{is_winner, check_capture};
-use crate::{PLAYER1_STATE, PLAYER2_STATE, UNPLAYED_STATE};
-use crate::board_piece::BoardPiece;
-use crate::builder::build_winner;
-use crate::game_data::AppState;
-use crate::negamax::alpha_beta_negamax;
+use crate::*;
 
 pub struct Board {
     pieces : Vector<BoardPiece>,
@@ -23,9 +12,6 @@ pub struct Board {
     }
  }
 
-// If this widget has any child widgets it should call its event, update and layout
-// (and lifecycle) methods as well to make sure it works. Some things can be filtered,
-// but a general rule is to just pass it through unless you really know you don't want it.
 impl Widget<AppState> for Board {
     fn event(&mut self, ctx: &mut EventCtx, event: &Event, data: &mut AppState, env : &Env) {
         if data.is_ai[(data.turn - 1) as usize] {
@@ -101,9 +87,7 @@ impl Widget<AppState> for Board {
         }
     }
 
-    // The paint method gets called last, after an event flow.
-    // It goes event -> update -> layout -> paint, and each method can influence the next.
-    // Basically, anything that changes the appearance of a widget causes a paint.
+    
     fn paint(&mut self, ctx: &mut PaintCtx, data: &AppState, env: &Env) {
         let size = ctx.size();
         let board = ctx.size().to_rect();

@@ -1,10 +1,5 @@
-use druid::widget::prelude::*;
-use druid::{Size, EventCtx, Data, Color, Point};
-use crate::{UNPLAYED_STATE, PLAYER1_STATE, PLAYER2_STATE};
-use crate::game_data::AppState;
-use crate::game_rules::{is_legal, check_capture, is_winner};
-use druid::kurbo::Circle;
-use std::time::Instant;
+use crate::*;
+
 
 #[derive(Clone, Data)]
 pub struct BoardPiece {

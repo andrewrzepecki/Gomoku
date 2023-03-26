@@ -1,6 +1,4 @@
 use gomoku::*;
-use std::time::Instant;
-use druid::Size;
 
 pub fn main() {
     

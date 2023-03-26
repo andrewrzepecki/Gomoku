@@ -1,5 +1,4 @@
-use druid::{Data, Lens, Color};
-use std::time::{Duration, Instant};
+use crate::*;
 
 #[derive(Clone, Data, Lens)]
 pub struct AppState {

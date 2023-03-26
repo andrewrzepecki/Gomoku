@@ -1,11 +1,4 @@
-use druid::im::Vector;
-use druid::{WindowDesc, LocalizedString, Point, Color, Insets};
-use druid::widget::prelude::*;
-use druid::{Widget, widget::{Flex, Label, Align, Button}};
-use crate::{AppState, BoardPiece, Board, PLAYER1_STATE};
-use druid::WidgetExt;
-use std::time::{Duration, Instant};
-
+use crate::*; 
 
 pub fn build_menu() -> impl Widget<AppState> {
     
