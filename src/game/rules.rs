@@ -1,6 +1,50 @@
 use crate::*;
 
 
+pub fn game_over(board : &mut Vec<Vec<i32>>, player : i32, player_captures : i32) -> bool {
+    
+    if player_captures >= MAX_CAPTURES {
+        return true;
+    }
+    if is_winner_board(board, player) {
+        return true;
+    }
+    if not_playable(board, player) {
+        return true;
+    }
+    return false;
+}
+
+fn not_playable(board: &mut Vec<Vec<i32>>, player : i32) -> bool {
+    let size = board[0].len() as i32;
+    for x in 0..size {
+        for y in 0..size {
+            if is_legal(board, x, y, player) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+pub fn is_winner_board(board: &mut Vec<Vec<i32>>, player : i32) -> bool {
+
+    let size = board[0].len() as i32; 
+
+    for x in 0..size {
+        for y in 0..size {
+            // Heuristic for candidate selection
+            if is_candidate(board, x as i32, y as i32, player) {
+                if is_winner(board, x as i32, y as i32, player) {
+                    return true;
+                }
+            }
+        }
+    }
+    false
+}
+
+
 pub fn is_illegal_capture(board : &Vec<Vec<i32>>, x :i32, y: i32, player : i32) -> bool {
     let size = board[0].len() as i32;
     let opp_player = if player == PLAYER1_STATE {PLAYER2_STATE} else {PLAYER1_STATE};

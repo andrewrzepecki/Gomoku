@@ -19,20 +19,8 @@ impl Widget<AppState> for Board {
     
     // Main Event Handler for all game changes.
     fn event(&mut self, ctx: &mut EventCtx, event: &Event, data: &mut AppState, env : &Env) {
-        
-        // Give Control to player if User.
-        for p in self.pieces.iter_mut() {
-            if !data.is_ai[(data.turn - 1) as usize] && data.winner == UNPLAYED_STATE {
-                p.event(ctx, event, data, env);
-            }
-        }
-        // Place Piece on board if player is AI.
-        if data.is_ai[(data.turn - 1) as usize] {
-            println!("Running algo");
-            let _move = alpha_beta_negamax(&mut data.board, data.turn, DEPTH, std::i32::MIN + 2, std::i32::MAX - 2);
-            update_board(data, _move.0, _move.1);
-        }
-        if data.winner != UNPLAYED_STATE {
+        // Check if game is over. 
+        if game_over(&mut data.board, data.turn, data.captures[(data.turn - 1) as usize]) {
             ctx.window().close();
             let window = WindowDesc::new(build_winner())
                 .title(LocalizedString::new("Game Over"))
@@ -40,7 +28,20 @@ impl Widget<AppState> for Board {
                 .window_size(Size::new(600.0, 450.0)
             );
             ctx.new_window(window);
+        }
+
+        // Place Piece on board if player is AI.
+        if data.is_ai[(data.turn - 1) as usize] {
+            println!("Running algo");
+            let _move = alpha_beta_negamax(&mut data.board, data.turn, DEPTH, std::i32::MIN + 2, std::i32::MAX - 2);
+            update_board(data, _move.0, _move.1);
+        }
+        // Give Control to player if User.
+        else {
+            for p in self.pieces.iter_mut() {
+                p.event(ctx, event, data, env);
             }
+        }
         ctx.request_paint();
     }
 

@@ -4,7 +4,7 @@ pub fn alpha_beta_negamax(board: &mut Vec<Vec<i32>>, player: i32, depth: i32, mu
     let mut best_pos: Option<(i32, i32)> = None;
     let mut best_score = std::i32::MIN;
     
-    if depth == 0  || winner_board(board, player) {
+    if depth == 0  || game_over(board, player, 0) {
         // Evaluate the board using a heuristic function
         let score = evaluate_board(board, player);
         return (-1, -1, score);

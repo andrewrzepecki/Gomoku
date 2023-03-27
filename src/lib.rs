@@ -20,4 +20,5 @@ pub const BOARDSIZE : i32 = 19;
 pub const UNPLAYED_STATE : i32 = 0;
 pub const PLAYER1_STATE : i32 = 1;
 pub const PLAYER2_STATE : i32 = 2;
-pub const DEPTH : i32 = 3;
+pub const DEPTH : i32 = 1;
+pub const MAX_CAPTURES : i32 = 5;
