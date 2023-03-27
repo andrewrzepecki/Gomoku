@@ -33,9 +33,8 @@ pub fn is_winner_board(board: &mut Vec<Vec<i32>>, player : i32) -> bool {
 
     for x in 0..size {
         for y in 0..size {
-            // Heuristic for candidate selection
-            if is_candidate(board, x as i32, y as i32, player) {
-                if is_winner(board, x as i32, y as i32, player) {
+            if board[x as usize][y as usize] != UNPLAYED_STATE {
+                if is_winner(board, x as i32, y as i32, board[x as usize][y as usize]) {
                     return true;
                 }
             }

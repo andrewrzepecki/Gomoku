@@ -20,14 +20,15 @@ impl Widget<AppState> for Board {
     // Main Event Handler for all game changes.
     fn event(&mut self, ctx: &mut EventCtx, event: &Event, data: &mut AppState, env : &Env) {
         // Check if game is over. 
-        if game_over(&mut data.board, data.turn, data.captures[(data.turn - 1) as usize]) {
-            ctx.window().close();
+        if game_over(&mut data.board, data.turn, data.captures[(data.turn - 1) as usize]) && !data.winner_opened {
+            //ctx.window().close();
             let window = WindowDesc::new(build_winner())
                 .title(LocalizedString::new("Game Over"))
                 .resizable(false)
                 .window_size(Size::new(600.0, 450.0)
             );
             ctx.new_window(window);
+            data.winner_opened = true;
         }
 
         // Place Piece on board if player is AI.
