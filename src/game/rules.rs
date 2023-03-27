@@ -1,7 +1,7 @@
 use crate::*;
 
 
-fn is_illegal_capture(board : &Vec<Vec<i32>>, x :i32, y: i32, player : i32) -> bool {
+pub fn is_illegal_capture(board : &Vec<Vec<i32>>, x :i32, y: i32, player : i32) -> bool {
     let size = board[0].len() as i32;
     let opp_player = if player == PLAYER1_STATE {PLAYER2_STATE} else {PLAYER1_STATE};
     for n in get_neighbours(x, y, size) {
@@ -21,7 +21,7 @@ fn is_illegal_capture(board : &Vec<Vec<i32>>, x :i32, y: i32, player : i32) -> b
 }
 
 
-fn is_double_three(board : &Vec<Vec<i32>>, x : i32, y : i32, player : i32) -> bool {
+pub fn is_double_three(board : &Vec<Vec<i32>>, x : i32, y : i32, player : i32) -> bool {
     let size = board[0].len() as i32;
     let mut doubles = 0;
     let mut copy_board = board.clone();

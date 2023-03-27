@@ -1,19 +1,11 @@
-pub mod board;
-pub mod board_piece;
-pub mod game_data;
-pub mod game_rules;
-pub mod utils;
-pub mod builder;
-pub mod negamax;
+pub mod game;
+pub mod data;
+pub mod minimax;
 
 // Gomoku imports for main
-pub use game_data::AppState;
-pub use board::{Board, update_board};
-pub use board_piece::BoardPiece;
-pub use builder::{build_menu, build_winner, build_pieces, build_board};
-pub use game_rules::{is_legal, is_winner, check_capture};
-pub use negamax::alpha_beta_negamax;
-pub use utils::{get_neighbours, is_valid_coords};
+pub use data::AppState;
+pub use game::{board::*, board_piece::*, utils::*, rules::*, builder::*};
+pub use minimax::{negamax::*, heuristics::*};
 
 // Druid 0.8.3 imports
 pub use druid::{AppLauncher, LocalizedString, WindowDesc, Color, im::Vector, kurbo::Line, Point, Size, Data, EventCtx, Lens, Insets};
