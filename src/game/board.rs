@@ -2,12 +2,14 @@ use crate::*;
 
 pub struct Board {
     pieces : Vector<BoardPiece>,
+    is_old : bool,
 }
 
  impl Board {
     pub fn new(pieces : Vector<BoardPiece>) -> Board {
         Board {
             pieces,
+            is_old : false,
         }
     }
  }
@@ -29,8 +31,11 @@ impl Widget<AppState> for Board {
             );
             ctx.new_window(window);
             data.winner_opened = true;
+            self.is_old = true;
         }
-
+        if self.is_old && !data.winner_opened {
+            ctx.window().close();
+        }
         // Place Piece on board if player is AI.
         if data.is_ai[(data.turn - 1) as usize] {
             println!("Running algo");

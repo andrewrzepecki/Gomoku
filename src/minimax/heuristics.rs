@@ -3,7 +3,7 @@ use crate::*;
 pub fn evaluate_board(board: &mut Vec<Vec<i32>>, player : i32) -> i32 {
     let mut score: i32 = 0;
     
-    if is_winner_board(board, player) {
+    if is_winner_board(board) {
         return std::i32::MAX - 5;
     }
     score += 1;

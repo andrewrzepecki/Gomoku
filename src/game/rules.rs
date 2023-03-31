@@ -6,7 +6,7 @@ pub fn game_over(board : &mut Vec<Vec<i32>>, player : i32, player_captures : i32
     if player_captures >= MAX_CAPTURES {
         return true;
     }
-    if is_winner_board(board, player) {
+    if is_winner_board(board) {
         return true;
     }
     if not_playable(board, player) {
@@ -27,7 +27,7 @@ fn not_playable(board: &mut Vec<Vec<i32>>, player : i32) -> bool {
     return true;
 }
 
-pub fn is_winner_board(board: &mut Vec<Vec<i32>>, player : i32) -> bool {
+pub fn is_winner_board(board: &mut Vec<Vec<i32>>) -> bool {
 
     let size = board[0].len() as i32; 
 
