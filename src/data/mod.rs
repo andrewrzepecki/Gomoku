@@ -7,8 +7,7 @@ pub struct AppState {
     pub turn : i32,
     pub player1_color : i32,
     pub player2_color : i32,
-    #[data(eq)]
-    pub board : Vec<Vec<i32>>,
+    pub board : Board,
     #[data(eq)]
     pub captures : Vec<i32>,
     pub winner : i32,
@@ -33,7 +32,7 @@ impl Default for AppState {
             turn : PLAYER1_STATE,
             player1_color : 0,
             player2_color : 1,
-            board : Vec::new(),
+            board : Board::new(BOARDSIZE),
             captures: Vec::from([0,0]),
             winner : 0,
             game_mode : "PvP".into(),
@@ -71,7 +70,7 @@ impl Default for AppState {
 impl AppState {
     pub fn reset(&mut self) -> Vector<BoardPiece> {
         let pieces = build_pieces(self.board_size);
-        self.board = build_board(self.board_size);
+        self.board = Board::new(self.board_size);
         self.turn = PLAYER1_STATE;
         self.captures = Vec::from([0,0]);
         self.winner = UNPLAYED_STATE;

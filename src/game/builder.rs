@@ -102,7 +102,7 @@ fn build_game(pieces: Vector<BoardPiece>) -> impl Widget<AppState> {
 
     let col = Flex::column()
         .with_flex_child(Label::new("Gomoku").with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE)), 1.0)
-        .with_flex_child(Align::centered(Board::new(pieces)), 10.0)
+        .with_flex_child(Align::centered(Goban::new(pieces)), 10.0)
         .with_flex_child(game_data_col, 2.0);
     col
 }
@@ -130,6 +130,7 @@ pub fn build_winner() -> impl Widget<AppState> {
                 let pieces = data.reset();
                 ctx.window().close();
                 let game_window = WindowDesc::new(build_game(pieces)).title(LocalizedString::new("Gomoku"));
+                data.winner_opened = true;
                 ctx.new_window(game_window);
             }
         );
@@ -183,18 +184,4 @@ pub fn build_pieces(size : i32) -> Vector<BoardPiece> {
         }
     }
     pieces
-}
-
-pub fn build_board(size : i32) -> Vec<Vec<i32>> {
-
-    let mut board = Vec::new();
-
-    for _ in  0..size {
-        let mut row = Vec::new();
-        for _ in 0..size {
-            row.push(0);
-        }
-        board.push(row);
-    }
-    board
 }

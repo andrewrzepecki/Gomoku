@@ -34,7 +34,7 @@ impl Widget<AppState> for BoardPiece {
     ) {
         if let Event::MouseDown(event) = event {
             if (self.position - event.pos).hypot() <= self.radius {
-                if is_legal(&data.board, self.x, self.y, data.turn) {
+                if data.board.is_legal_move(self.x, self.y, data.turn) {
                     update_board(data, self.x, self.y);
                 }
             }
@@ -56,7 +56,7 @@ impl Widget<AppState> for BoardPiece {
         data: &AppState,
         _env: &Env,
     ) {
-        self.state = data.board[self.x as usize][self.y as usize];
+        self.state = data.board[(self.x, self.y)];
     }
 
     fn layout(
@@ -81,19 +81,19 @@ impl Widget<AppState> for BoardPiece {
         let y = y_delta * (self.y as f64) + (y_delta / 2.0);
         self.radius = (x_delta + y_delta) / 2.0 / 3.0;
         self.position = Point::new(x, y);
-        let color = get_piece_color(&data, self.x, self.y, self.state);
+        let color = get_piece_color(&mut data.clone(), self.x, self.y, self.state);
         ctx.fill(Circle::new(self.position, self.radius), &color);
     }
 }
 
 // Function to set color of the piece depeding on the AppState.
-fn get_piece_color(data : &AppState, x: i32, y: i32, state: i32) -> Color {
+fn get_piece_color(data : &mut AppState, x: i32, y: i32, state: i32) -> Color {
     let mut color = Color::TRANSPARENT;
     if state != UNPLAYED_STATE {
         color = if state == PLAYER1_STATE {data.colors[data.player1_color as usize]} else {data.colors[data.player2_color as usize]};
     }
     else {
-        color = if !is_legal(&data.board, x, y, data.turn) {Color::rgba8(255, 0, 0, 50)} else {color};
+        color = if !data.board.is_legal_move(x, y, data.turn) {Color::rgba8(255, 0, 0, 50)} else {color};
         if data.sugested != None {
             color = if data.sugested.unwrap().0 == x && data.sugested.unwrap().1 == y {Color::rgba8(0, 255, 0, 50)} else {color};
         }
