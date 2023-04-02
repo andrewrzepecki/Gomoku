@@ -1,11 +1,11 @@
 pub mod game;
 pub mod data;
-//pub mod minimax;
+pub mod minimax;
 
 // Gomoku imports for main
 pub use data::AppState;
 pub use game::{goban::*, board::*, board_piece::*, builder::*};
-//pub use minimax::{negamax::*, heuristics::*};
+pub use minimax::{negamax::*, heuristics::*};
 
 // Druid 0.8.3 imports
 pub use druid::{AppLauncher, LocalizedString, WindowDesc, Color, im::Vector, kurbo::Line, Point, Size, Data, EventCtx, Lens, Insets};

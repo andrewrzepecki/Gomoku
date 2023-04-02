@@ -5,7 +5,8 @@ use crate::*;
 //
 
 pub struct BoardMove {
-    pub to_set : (i32, i32),
+    pub x : i32,
+    pub y : i32,
     pub player : i32,
     pub to_remove: Vec<(i32, i32)>,
     pub set : bool,
@@ -14,7 +15,8 @@ pub struct BoardMove {
 impl BoardMove {
     pub fn new(x: i32, y: i32, player: i32) -> BoardMove {
         BoardMove {
-            to_set : (x, y),
+            x : x,
+            y : y,
             player : player,
             to_remove : Vec::new(),
             set : false,
@@ -22,13 +24,13 @@ impl BoardMove {
     }
 
     pub fn set(&mut self, board: &mut Board) {
-        if board.is_legal_move(self.to_set.0, self.to_set.1, self.player) {
-            self.to_remove = board.return_captured(self.to_set.0, self.to_set.1, self.player);
+        if board.is_legal_move(self.x, self.y, self.player) {
+            self.to_remove = board.return_captured(self.x, self.y, self.player);
             for &(x, y) in &self.to_remove {
                 board[(x, y)] = UNPLAYED_STATE;
                 board.captures[(self.player - 1) as usize] += 1;
             }
-            board[(self.to_set.0, self.to_set.1)] = self.player;
+            board[(self.x, self.y)] = self.player;
             self.set = true;
         }
     }
@@ -39,7 +41,7 @@ impl BoardMove {
                 board[(x, y)] = board.get_opponent(self.player);
                 board.captures[(self.player - 1) as usize] -= 1;
             }
-            board[(self.to_set.0, self.to_set.1)] = UNPLAYED_STATE;
+            board[(self.x, self.y)] = UNPLAYED_STATE;
             self.set = false;
         }
     }
@@ -77,6 +79,7 @@ impl IndexMut<(i32, i32)> for Board {
 
 
 impl Board {
+    
     pub fn new(size: i32) -> Board {
         Board {
             size : size,
@@ -85,6 +88,8 @@ impl Board {
         }
     }
 
+
+    // Main Logic & Rules for Gomoku.
     pub fn is_legal_move(&mut self, x: i32, y: i32, player : i32) -> bool {
         if !self.is_valid(x, y) {
             return false;
@@ -112,6 +117,7 @@ impl Board {
     }
 
 
+    
     pub fn return_captured(&self, x : i32, y : i32, player : i32) -> Vec<(i32, i32)> {
         let opp_player = self.get_opponent(player);
 
@@ -131,6 +137,8 @@ impl Board {
         return vec![];
     }
 
+    
+    
     pub fn is_illegal_capture(&self, x: i32, y: i32, player: i32) -> bool {
         let opp_player = self.get_opponent(player);
         for n in self.get_neighbours(x, y) {
@@ -150,87 +158,18 @@ impl Board {
     }
 
 
-    /// .
+
+    /// check if moves triggers an illegal double free three.
     pub fn is_double_three(&mut self, x: i32, y: i32, player: i32) -> bool {
-        let mut doubles = 0;
         
         self[(x, y)] = player;
-        
-        for i in 0..self.size {
-
-            for j in 0..self.size {
-
-                if self[(i, j)] == player {
-
-                    for n in self.get_neighbours(i, j) {
-
-                        if self[(n.0, n.1)] == player || self[(n.0, n.1)] == UNPLAYED_STATE {
-
-                            let mut s_count = 1;
-                            let mut b_count = 0;
-                            let x2 = i + ((n.0 - i) * 2);
-                            let y2 = j + ((n.1 - j) * 2);
-                            let x3 = i + ((n.0 - i) * 3);
-                            let y3 = j + ((n.1 - j) * 3);
-                            let x0 = i + ((n.0 - i) * -1);
-                            let y0 = j + ((n.1 - j) * -1);
-
-                            if self.is_valid(x2, y2) && 
-                                self.is_valid(x3, y3) && 
-                                self.is_valid(x0, y0) {
-                                
-                                let p2 = self[(x2, y2)];
-                                let p3 = self[(x3, y3)];
-                                let p0 = self[(x0, y0)];
-                                if p0 != UNPLAYED_STATE {
-                                    continue;
-                                }
-                                if self[(n.0, n.1)] == UNPLAYED_STATE {
-                                    b_count += 1;
-                                }
-                                else {
-                                    s_count += 1;
-                                }
-                                if p2 == UNPLAYED_STATE {
-                                    b_count += 1;
-                                }
-                                else if p2 == player {
-                                    s_count += 1;
-                                }
-                                if p3 == UNPLAYED_STATE {
-                                    b_count += 1;
-                                }
-                                else if p3 == player {
-                                    s_count += 1;
-                                }
-                                if s_count == 3 && b_count == 1 {
-                                    if p3 == UNPLAYED_STATE {
-                                        doubles += 1;
-                                    }
-                                    else if p3 == player {
-                                        let x4 = i + ((n.0 - i) * 4);
-                                        let y4 = j + ((n.1 - j) * 4);
-                                        if self.is_valid(x4, y4) {
-                                            let p4 = self[(x4, y4)];
-                                            if p4 == UNPLAYED_STATE {
-                                                doubles += 1;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        let count = self.count_open_alignements_of(3, player);
         self[(x, y)] = UNPLAYED_STATE;
-        if doubles > 2 {
-            return true;
-        }
-        return false;
+        return if count > 1 {true} else {false}
     }
 
+    
+    
     pub fn game_over(&mut self, player : i32) -> bool {
         
         if self.return_winner() != UNPLAYED_STATE {
@@ -242,6 +181,8 @@ impl Board {
         return false;
     }
 
+    
+    
     pub fn return_winner(&self) -> i32 {
 
         for x in 0..self.size {
@@ -256,6 +197,8 @@ impl Board {
         UNPLAYED_STATE
     }
 
+    
+    
     pub fn is_winner(&self, x : i32, y : i32, player : i32) -> bool {
         
         for n in self.get_neighbours(x, y) {
@@ -289,6 +232,8 @@ impl Board {
         return false;
     }
 
+    
+    
     pub fn not_playable(&mut self, player : i32) -> bool {
     
         for x in 0..self.size {
@@ -301,6 +246,8 @@ impl Board {
         return true;
     }
         
+    
+    
     pub fn get_neighbours(&self, x: i32, y: i32) -> impl Iterator<Item = (i32, i32)> {
         let mut neighbors = Vec::new();
         
@@ -339,12 +286,78 @@ impl Board {
         neighbors.into_iter()
     }
 
+    
+    
     pub fn get_opponent(&self, player: i32) -> i32 {
         if player == PLAYER1_STATE {PLAYER2_STATE} else {PLAYER1_STATE}    
     }
 
-    pub fn count_alignements_of(of: i32, player: i32) -> i32 {
-       0 
+    pub fn get_delta(&self, p1: (i32, i32), p2: (i32, i32)) -> (i32, i32) {
+        let dx = p2.0 - p1.0;
+        let dy = p2.1 - p1.1;
+        return (dx, dy);
+    }
+
+    pub fn count_open_alignements_of(&self, of: i32, player: i32) -> i32 {
+        
+        let mut alignements = 0;
+        for x in 0..self.size {
+            for y in 0..self.size {
+
+                if self[(x, y)] == UNPLAYED_STATE {
+                    for n in self.get_neighbours(x, y) {
+                        
+                        // Count on the line from current black + player number of players and blanks.
+                        if self[(n.0, n.1)] == player {
+                            let mut player_count = 1;
+                            let mut blank_count = 0;
+                            let (dx, dy) = self.get_delta((x, y), (n.0, n.1));
+                            for i in 1..of {
+                                let check_x = n.0 + (dx * i);
+                                let check_y = n.1 + (dy * i);
+                                if self.is_valid(check_x, check_y) {
+                                    if self[(check_x, check_y)] == player {
+                                        player_count += 1;
+                                    }
+                                    else {
+                                        blank_count += 1;
+                                    }
+                                }
+                            }
+                            // If all were player, check for following blank.
+                            if player_count == of {
+                                let final_x = n.0 + (dx * of);
+                                let final_y = n.1 + (dy * of);
+                                if self.is_valid(final_x, final_y) {
+                                    if self[(final_x, final_y)] == UNPLAYED_STATE {
+                                        alignements += 1;
+                                    }
+                                }
+                            }
+                            // If has one blank and all remaining player, check for next two to be player and blank.
+                            else if player_count == (of - 1) && blank_count == 1 {
+                                let final_x = n.0 + (dx * of);
+                                let final_y = n.1 + (dy * of);
+                                if self.is_valid(final_x, final_y) {
+                                    if self[(final_x, final_y)] == player {
+                                        let blank_x = n.0 + (dx * (of + 1));
+                                        let blank_y = n.1 + (dy * (of + 1));
+                                        if self.is_valid(blank_x, blank_y) {
+                                            if self[(final_x, final_y)] == UNPLAYED_STATE {
+                                                alignements += 1;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // All alignements will be counted twice, so return half.
+        return alignements / 2 as i32;
     }
 }
 
