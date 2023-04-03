@@ -10,6 +10,9 @@ pub use minimax::{negamax::*, heuristics::*};
 // Druid 0.8.3 imports
 pub use druid::{AppLauncher, LocalizedString, WindowDesc, Color, im::Vector, kurbo::Line, Point, Size, Data, EventCtx, Lens, Insets};
 pub use std::time::{Instant, Duration};
+use std::collections::HashMap;
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 use core::ops::{IndexMut, Index};
 pub use druid::widget::prelude::*;
 pub use druid::{Widget, widget::{Flex, Label, Align, Button}};

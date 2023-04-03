@@ -24,7 +24,7 @@ impl BoardMove {
     }
 
     pub fn set(&mut self, board: &mut Board) {
-        if board.is_legal_move(self.x, self.y, self.player) {
+        if !self.set {
             self.to_remove = board.return_captured(self.x, self.y, self.player);
             for &(x, y) in &self.to_remove {
                 board[(x, y)] = UNPLAYED_STATE;
@@ -88,6 +88,15 @@ impl Board {
         }
     }
 
+    pub fn get_hash(&self) -> String {
+        let separator = "|";
+        let board_str = self.board
+            .iter()
+            .map(|i| i.to_string())
+            .collect::<Vec<String>>()
+            .join(separator);
+        board_str
+    }
 
     // Main Logic & Rules for Gomoku.
     pub fn is_legal_move(&mut self, x: i32, y: i32, player : i32) -> bool {
@@ -163,7 +172,8 @@ impl Board {
     pub fn is_double_three(&mut self, x: i32, y: i32, player: i32) -> bool {
         
         self[(x, y)] = player;
-        let count = self.count_open_alignements_of(3, player);
+        let count = self.count_free_open_alignements_of(3, player)
+         + self.count_free_closed_alignements_of(3, player);
         self[(x, y)] = UNPLAYED_STATE;
         return if count > 1 {true} else {false}
     }
@@ -298,7 +308,7 @@ impl Board {
         return (dx, dy);
     }
 
-    pub fn count_open_alignements_of(&self, of: i32, player: i32) -> i32 {
+    pub fn count_free_open_alignements_of(&self, of: i32, player: i32) -> i32 {
         
         let mut alignements = 0;
         for x in 0..self.size {
@@ -325,17 +335,8 @@ impl Board {
                                 }
                             }
                             // If all were player, check for following blank.
-                            if player_count == of {
-                                let final_x = n.0 + (dx * of);
-                                let final_y = n.1 + (dy * of);
-                                if self.is_valid(final_x, final_y) {
-                                    if self[(final_x, final_y)] == UNPLAYED_STATE {
-                                        alignements += 1;
-                                    }
-                                }
-                            }
                             // If has one blank and all remaining player, check for next two to be player and blank.
-                            else if player_count == (of - 1) && blank_count == 1 {
+                            if player_count == (of - 1) && blank_count == 1 {
                                 let final_x = n.0 + (dx * of);
                                 let final_y = n.1 + (dy * of);
                                 if self.is_valid(final_x, final_y) {
@@ -358,6 +359,135 @@ impl Board {
 
         // All alignements will be counted twice, so return half.
         return alignements / 2 as i32;
+    }
+
+    pub fn count_free_closed_alignements_of(&self, of: i32, player: i32) -> i32 {
+        
+        let mut alignements = 0;
+        for x in 0..self.size {
+            for y in 0..self.size {
+
+                if self[(x, y)] == UNPLAYED_STATE {
+                    for n in self.get_neighbours(x, y) {
+                        
+                        // Count on the line from current black + player number of players and blanks.
+                        if self[(n.0, n.1)] == player {
+                            let mut player_count = 1;
+                            let (dx, dy) = self.get_delta((x, y), (n.0, n.1));
+                            for i in 1..of {
+                                let check_x = n.0 + (dx * i);
+                                let check_y = n.1 + (dy * i);
+                                if self.is_valid(check_x, check_y) {
+                                    if self[(check_x, check_y)] == player {
+                                        player_count += 1;
+                                    }
+                                }
+                            }
+                            // If all were player, check for following blank.
+                            if player_count == of {
+                                let final_x = n.0 + (dx * of);
+                                let final_y = n.1 + (dy * of);
+                                if self.is_valid(final_x, final_y) {
+                                    if self[(final_x, final_y)] == UNPLAYED_STATE {
+                                        alignements += 1;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // All alignements will be counted twice, so return half.
+        return alignements / 2 as i32;
+    }
+
+    pub fn count_blocked_closed_alignements_of(&self, of: i32, player: i32) -> i32 {
+        
+        let mut alignements = 0;
+        for x in 0..self.size {
+            for y in 0..self.size {
+                if self[(x, y)] == UNPLAYED_STATE {
+                    for n in self.get_neighbours(x, y) {
+                        
+                        // Count on the line from current black + player number of players and blanks.
+                        if self[(n.0, n.1)] == player {
+                            let mut player_count = 1;
+                            let (dx, dy) = self.get_delta((x, y), (n.0, n.1));
+                            for i in 1..of {
+                                let check_x = n.0 + (dx * i);
+                                let check_y = n.1 + (dy * i);
+                                if self.is_valid(check_x, check_y) {
+                                    if self[(check_x, check_y)] == player {
+                                        player_count += 1;
+                                    }
+                                }
+                            }
+                            // If all were player, check for following blank.
+                            if player_count == of {
+                                let final_x = n.0 + (dx * of);
+                                let final_y = n.1 + (dy * of);
+                                if self.is_valid(final_x, final_y) {
+                                    if self[(final_x, final_y)] == self.get_opponent(player) {
+                                        alignements += 1;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return alignements;
+    }
+
+
+    pub fn count_blocked_open_alignements_of(&self, of: i32, player: i32) -> i32 {
+        
+        let mut alignements = 0;
+        for x in 0..self.size {
+            for y in 0..self.size {
+
+                if self[(x, y)] == UNPLAYED_STATE {
+                    for n in self.get_neighbours(x, y) {
+                        
+                        // Count on the line from current black + player number of players and blanks.
+                        if self[(n.0, n.1)] == player {
+                            let mut player_count = 1;
+                            let mut blank_count = 0;
+                            let (dx, dy) = self.get_delta((x, y), (n.0, n.1));
+                            for i in 1..of {
+                                let check_x = n.0 + (dx * i);
+                                let check_y = n.1 + (dy * i);
+                                if self.is_valid(check_x, check_y) {
+                                    if self[(check_x, check_y)] == player {
+                                        player_count += 1;
+                                    }
+                                    else {
+                                        blank_count += 1;
+                                    }
+                                }
+                            }
+                            // If all were player, check for following blank.
+                            // If has one blank and all remaining player, check for next two to be player and blank.
+                            if player_count == (of - 1) && blank_count == 1 {
+                                let final_x = n.0 + (dx * of);
+                                let final_y = n.1 + (dy * of);
+                                if self.is_valid(final_x, final_y) {
+                                    if self[(final_x, final_y)] == self.get_opponent(player) {
+                                        alignements += 1;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return alignements;
     }
 }
 

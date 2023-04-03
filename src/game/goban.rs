@@ -36,7 +36,7 @@ impl Widget<AppState> for Goban {
         // Place Piece on board if player is AI.
         if data.is_ai[(data.turn - 1) as usize] {
             println!("------Running algo");
-            let _move = alpha_beta_negamax(&mut data.board, data.turn, DEPTH, std::i32::MIN + 2, std::i32::MAX - 2);
+            let _move = alpha_beta_negamax(&mut data.board, data.turn, DEPTH, -1000000, 1000000, &mut HashMap::new());
             update_board(data, _move.0, _move.1);
         }
 
@@ -155,7 +155,7 @@ pub fn update_board(data: &mut AppState, x: i32, y: i32) {
     // Get Sugested Move from AI.
     if !data.is_ai[(data.turn - 1) as usize] && data.game_mode == "PvP" {
         println!("-----------       Running algo");
-        let ai_move = alpha_beta_negamax(&mut data.board, data.turn, DEPTH, std::i32::MIN + 2, std::i32::MAX - 2);
+        let ai_move = alpha_beta_negamax(&mut data.board, data.turn, DEPTH, std::i32::MIN + 2, std::i32::MAX - 2, &mut HashMap::new());
         data.sugested = Some((ai_move.0, ai_move.1));
     }
 }
