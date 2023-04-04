@@ -8,54 +8,31 @@ pub fn evaluate_board(board: &mut Board, player: i32) -> i32 {
     
     let mut score: i32 = 0;
     let opp_player = board.get_opponent(player);
-    let winner = board.return_winner();
     
     // Score Winner
-    if winner != UNPLAYED_STATE {
-        score += if player == winner {1000000} else {-1000000};
+    for line in board.get_lines() {
+
+        // Scan Every Line for pattern.
+        for (pattern, value) in &board.score_table {
+            
+            // Change pattern to current player values.
+            let p = pattern.replace("x", &format!("{}", player));
+            let p = p.replace("o", &format!("{}", opp_player));
+            score += board.count_line_occurrences(&line, &p) * value.0;
+            
+            // Non-symetrical
+            if value.1 {
+                let reversed = p.chars().rev().collect::<String>();
+                score += board.count_line_occurrences(&line, &reversed) * value.0;
+            }
+        }
     }
+
     // Score Captures
-    score += board.captures[(player - 1) as usize] * 100000;
-    score += board.captures[(opp_player - 1) as usize] * -100000;
-
-    
-    // Score Open Fours (LiveFour)
-    if live_four(board, player) == 1 {
-        score += 150000;
-    }
-    if live_four(board, opp_player) == 1 {
-        score += -150000;
-    }
-
-    // Score Blocked on one side Fours (DeadFour)
-    // TODO
-    if live_three(board, player) >= 2 || dead_four(board, player) == 2
-        || (dead_four(board, player) == 1) && (live_three(board, player) == 1) {
-        score += 100000;
-    }
-    return score
+    score += board.captures[(player - 1) as usize] * 10000;
+    score
 }
 
-pub fn live_four(board: &mut Board, player: i32) -> i32 {
-    board.count_free_closed_alignements_of(4, player)
-}
-
-pub fn dead_four(board: &mut Board, player: i32) -> i32 {
-    board.count_blocked_closed_alignements_of(4, player)
-}
-
-pub fn live_three(board: &mut Board, player: i32) -> i32 {
-    let count = board.count_free_open_alignements_of(4, player)
-        + board.count_free_open_alignements_of(3, player)
-        + board.count_free_closed_alignements_of(3, player);
-    count
-}
-
-pub fn dead_three(board: &mut Board, player: i32) -> i32 {
-    let count = board.count_blocked_open_alignements_of(3, player)
-        + board.count_blocked_closed_alignements_of(3, player);
-    count
-}
 
 /*
     Candidate proposal: Return only viable move candidates in order of evaluate_board
@@ -64,19 +41,18 @@ pub fn dead_three(board: &mut Board, player: i32) -> i32 {
 
 pub fn evaluate_candidate(board: &mut Board, x: i32, y: i32, player: i32) -> i32 {
     let mut score = 0;
-    let opp_player = board.get_opponent(player);
+    //let opp_player = board.get_opponent(player);
     for n in board.get_neighbours(x, y) {
-        if board[(n.0, n.1)] == opp_player {
+        if board[(n.0, n.1)] == player {
             let (xd, yd) = board.get_delta((x, y), (n.0, n.1));
             let mut i = 1;
             score += 1; 
-            while board.is_valid(n.0 + (xd * i), n.1 + (yd * i)) && board[(n.0 + (xd * i), n.1 + (yd * i))] == opp_player {
+            while board.is_valid(n.0 + (xd * i), n.1 + (yd * i)) && board[(n.0 + (xd * i), n.1 + (yd * i))] == player {
                 i += 1;
                 score += 1;
             }
         }
     }
-    println!("{}",score);
     score
 }
 
@@ -99,8 +75,10 @@ pub fn get_moves(board: &mut Board, player: i32) ->  Vec<BoardMove> {
     for x in 0..board.size {
         for y in 0..board.size {            
             if is_candidate(board, x as i32, y as i32, player) {
-                let candidate = BoardMove::new(x, y, player);
-                let score = evaluate_candidate(board, x, y, player);
+                let mut candidate = BoardMove::new(x, y, player);
+                candidate.set(board);
+                let score = evaluate_board(board, player);
+                candidate.unset(board);
                 moves.push((candidate, score));
             }
         }

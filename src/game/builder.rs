@@ -119,7 +119,7 @@ fn format_duration(duration: Duration) -> String {
 }
 
 pub fn build_winner() -> impl Widget<AppState> {
-    
+ 
     let winner_label = Label::new(|data: &AppState, _env: &Env| {format!("Player {} Wins!", data.winner)})
         .with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE));
     

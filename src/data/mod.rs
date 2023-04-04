@@ -1,5 +1,6 @@
 use crate::*;
 
+
 #[derive(Clone, Data, Lens)]
 pub struct AppState {
     pub label: String,
@@ -22,6 +23,8 @@ pub struct AppState {
     pub is_ai : Vec<bool>,
     pub sugested : Option<(i32, i32)>,
     pub winner_opened : bool,
+    #[data(eq)]
+    pub tt : HashMap<String, (i32, i32, i32)>,
 }
 
 impl Default for AppState {
@@ -63,6 +66,7 @@ impl Default for AppState {
             is_ai : Vec::from([false, false]),
             sugested : None,
             winner_opened : false,
+            tt : load_tt_table(),
         }
     }
 }
@@ -81,4 +85,25 @@ impl AppState {
         self.winner_opened = false;
         pieces
     }
+}
+
+
+fn load_tt_table() -> HashMap<String, (i32, i32, i32)> {
+    if Path::new(&TT_PATH).exists() {
+        let file = File::open(TT_PATH).unwrap();
+        let reader = BufReader::new(file);
+        let tt = serde_json::from_reader(reader).unwrap();
+        return tt;
+    }
+    else {
+        let tt = HashMap::new();
+        return tt;
+    }
+}
+
+pub fn save_tt_table(tt: &mut HashMap<String, (i32, i32, i32)>) {
+    // Open a file for writing
+    let file = File::create(TT_PATH).unwrap();
+    let writer = BufWriter::new(file);
+    serde_json::to_writer(writer, &tt).unwrap();
 }

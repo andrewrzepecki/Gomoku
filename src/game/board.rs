@@ -59,6 +59,8 @@ pub struct Board {
     pub board: Vec<i32>,
     #[data(eq)]
     pub captures : Vec<i32>,
+    #[data(eq)]
+    pub score_table : HashMap<String, (i32, bool)>,
 }
 
 
@@ -85,11 +87,53 @@ impl Board {
             size : size,
             board : vec![0; (size * size) as usize],
             captures : vec![0,0],
+            score_table : Board::get_score_table(),
         }
     }
-
+    
+    // Main Pattern Scoring interface.
+    pub fn get_score_table() -> HashMap<String, (i32, bool)> {
+        let mut map = HashMap::new();
+        
+        // --- Five in a Row
+        map.insert("xxxxx".to_string(), (100000, false));
+        
+        // --- Live Four
+        map.insert("0xxxx0".to_string(), (50000, false));
+        
+        // --- Dead Four
+        map.insert("oxxxx0".to_string(), (5000, true));
+        map.insert("0x0xxx0".to_string(), (5000, true));
+        map.insert("0xx0xx0".to_string(), (5000, false));
+        
+        // --- Live Three
+        map.insert("0xxx0".to_string(), (5000, false));
+        
+        // --- Dead Three
+        map.insert("0xx0x0".to_string(), (100, true));
+        map.insert("oxxx0".to_string(), (100, true));
+        map.insert("oxx0x0".to_string(), (100, true));
+        map.insert("ox0xx0".to_string(), (100, true));
+        map.insert("0xx00x0".to_string(), (100, true));
+        map.insert("0x0x0x0".to_string(), (100, false));
+        map.insert("o0xxx0o".to_string(), (100, false));
+        
+        // --- Live Two
+        map.insert("0x000x0".to_string(), (500, false));
+        map.insert("0x00x0".to_string(), (500, false));
+        map.insert("0x0x0".to_string(), (500, false));
+        // --- Dead Two
+        map.insert("oxx0".to_string(), (10, true));
+        map.insert("ox0x0".to_string(), (10, true));
+        map.insert("ox00x0".to_string(), (10, true));
+        map.insert("0xx0".to_string(), (10, false));
+        
+        map
+    }
+    
     pub fn get_hash(&self) -> String {
-        let separator = "|";
+
+        let separator = "";
         let board_str = self.board
             .iter()
             .map(|i| i.to_string())
@@ -98,6 +142,64 @@ impl Board {
         board_str
     }
 
+    pub fn get_lines(&self) -> Vec<String> {
+        
+        // Main function for analyzing board:
+        // Return columns, rows, diags and anti-diagonals
+        let mut lines = Vec::new();
+
+        
+        for x in 0..self.size {
+            let mut col = String::new();
+            let mut row = String::new();
+            let mut diag_top = String::new();
+            let mut diag_bottom = String::new();
+            let mut anti_diag_top = String::new();
+            let mut anti_diag_bottom = String::new();
+            for y in 0..self.size {
+                col.push_str(self[(x, y)].to_string().as_str());
+                row.push_str(self[(y, x)].to_string().as_str());
+                
+                if self.is_valid(x + y , y) {
+                    diag_top.push_str(self[(x + y, y)].to_string().as_str());
+                    if x != 0 {
+                        diag_bottom.push_str(self[(y, x + y)].to_string().as_str())
+                    }
+                }
+                if self.is_valid((self.size - 1) - (x + y), y) {
+                    anti_diag_top.push_str(self[((self.size - 1) - (x + y), y)].to_string().as_str());
+                    if x != 0 {
+                        anti_diag_bottom.push_str(self[((self.size - 1) -  y, (y + x))].to_string().as_str())
+                    }
+                }
+
+            }
+            lines.push(col);
+            lines.push(row);
+            lines.push(diag_top);
+            lines.push(anti_diag_top);
+            if x != 0 {
+                lines.push(diag_bottom);
+                lines.push(anti_diag_bottom)
+            }
+        }
+        return lines;
+    }
+
+
+    pub fn count_line_occurrences(&self, vec: &str, subvec: &str) -> i32 {
+        if subvec.is_empty() {
+            return 0;
+        }
+        let subvec_len = subvec.len();
+        if subvec_len > vec.len() {
+            return 0;
+        }
+        let windows = vec.as_bytes().windows(subvec_len);
+        windows.filter(|window| window.eq(&subvec.as_bytes())).count() as i32
+    }
+
+    
     // Main Logic & Rules for Gomoku.
     pub fn is_legal_move(&mut self, x: i32, y: i32, player : i32) -> bool {
         if !self.is_valid(x, y) {
@@ -191,10 +293,9 @@ impl Board {
         return false;
     }
 
-    
-    
+        
     pub fn return_winner(&self) -> i32 {
-
+        // Check Five
         for x in 0..self.size {
             for y in 0..self.size {
                 if self[(x, y)] != UNPLAYED_STATE {
@@ -204,7 +305,15 @@ impl Board {
                 }
             }
         }
-        UNPLAYED_STATE
+        // Check Captures
+        let mut winner = UNPLAYED_STATE;
+        if self.captures[0] >= MAX_CAPTURES {
+            winner = PLAYER1_STATE
+        }
+        else if self.captures[1] >= MAX_CAPTURES {
+            winner = PLAYER1_STATE
+        }
+        winner
     }
 
     
@@ -334,6 +443,7 @@ impl Board {
                                     }
                                 }
                             }
+                            
                             // If all were player, check for following blank.
                             // If has one blank and all remaining player, check for next two to be player and blank.
                             if player_count == (of - 1) && blank_count == 1 {
@@ -362,85 +472,35 @@ impl Board {
     }
 
     pub fn count_free_closed_alignements_of(&self, of: i32, player: i32) -> i32 {
-        
-        let mut alignements = 0;
-        for x in 0..self.size {
-            for y in 0..self.size {
-
-                if self[(x, y)] == UNPLAYED_STATE {
-                    for n in self.get_neighbours(x, y) {
-                        
-                        // Count on the line from current black + player number of players and blanks.
-                        if self[(n.0, n.1)] == player {
-                            let mut player_count = 1;
-                            let (dx, dy) = self.get_delta((x, y), (n.0, n.1));
-                            for i in 1..of {
-                                let check_x = n.0 + (dx * i);
-                                let check_y = n.1 + (dy * i);
-                                if self.is_valid(check_x, check_y) {
-                                    if self[(check_x, check_y)] == player {
-                                        player_count += 1;
-                                    }
-                                }
-                            }
-                            // If all were player, check for following blank.
-                            if player_count == of {
-                                let final_x = n.0 + (dx * of);
-                                let final_y = n.1 + (dy * of);
-                                if self.is_valid(final_x, final_y) {
-                                    if self[(final_x, final_y)] == UNPLAYED_STATE {
-                                        alignements += 1;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        let pattern = format!(
+            "{}{}{}",
+            UNPLAYED_STATE,
+            player.to_string().as_str().repeat(of as usize),
+            UNPLAYED_STATE
+        );
+        let mut count = 0;
+        let all_lines = self.get_lines(); 
+        for lt in all_lines {
+            count += self.count_line_occurrences(&lt, &pattern);
         }
-
-        // All alignements will be counted twice, so return half.
-        return alignements / 2 as i32;
+        return count;
     }
 
     pub fn count_blocked_closed_alignements_of(&self, of: i32, player: i32) -> i32 {
-        
-        let mut alignements = 0;
-        for x in 0..self.size {
-            for y in 0..self.size {
-                if self[(x, y)] == UNPLAYED_STATE {
-                    for n in self.get_neighbours(x, y) {
-                        
-                        // Count on the line from current black + player number of players and blanks.
-                        if self[(n.0, n.1)] == player {
-                            let mut player_count = 1;
-                            let (dx, dy) = self.get_delta((x, y), (n.0, n.1));
-                            for i in 1..of {
-                                let check_x = n.0 + (dx * i);
-                                let check_y = n.1 + (dy * i);
-                                if self.is_valid(check_x, check_y) {
-                                    if self[(check_x, check_y)] == player {
-                                        player_count += 1;
-                                    }
-                                }
-                            }
-                            // If all were player, check for following blank.
-                            if player_count == of {
-                                let final_x = n.0 + (dx * of);
-                                let final_y = n.1 + (dy * of);
-                                if self.is_valid(final_x, final_y) {
-                                    if self[(final_x, final_y)] == self.get_opponent(player) {
-                                        alignements += 1;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        let pattern = format!(
+            "{}{}{}",
+            UNPLAYED_STATE,
+            player.to_string().as_str().repeat(of as usize),
+            self.get_opponent(player)
+        );
+        let anti_pattern = pattern.chars().rev().collect::<String>();
+        let mut count = 0;
+        let all_lines = self.get_lines(); 
+        for lt in all_lines {
+            count += self.count_line_occurrences(&lt, &pattern);
+            count += self.count_line_occurrences(&lt, &anti_pattern);
         }
-
-        return alignements;
+        return count;
     }
 
 
