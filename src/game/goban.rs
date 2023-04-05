@@ -1,5 +1,3 @@
-use std::hash::Hash;
-
 use crate::{*, data::save_tt_table};
 
 pub struct Goban {

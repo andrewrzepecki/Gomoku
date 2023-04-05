@@ -39,7 +39,7 @@ pub fn get_final_score(board: &mut Board, player: i32) -> i32 {
 }
 
 pub fn capture_score(board: &mut Board, player: i32) -> i32 {
-    return board.captures[(player - 1) as usize] * 1000;
+    return board.captures[(player - 1) as usize] * 1500;
 }
 
 /*
@@ -53,6 +53,13 @@ pub fn is_candidate(board: &mut Board, x: i32, y: i32, player: i32) -> bool {
             if board[(n.0, n.1)] != UNPLAYED_STATE {
                 return true;
             }
+            else if board.is_legal_move(n.0, n.1, player){
+                for adj in board.get_neighbours(n.0, n.1) {
+                    if board[(adj.0, adj.1)] != UNPLAYED_STATE {
+                        return true;
+                    }
+                }
+            } 
         }
     }
     false
@@ -92,42 +99,74 @@ pub fn get_random_move(board: &mut Board, player: i32) -> BoardMove {
 }
 
 
+pub fn evaluate_move(board : &mut Board, player_move: &mut BoardMove) -> i32 {
+    
+    let opp = board.get_opponent(player_move.player);
+    let mut opp_score = 0;
+    if board.is_legal_move(player_move.x, player_move.y, opp) {
+        let mut opp_move = BoardMove::new(player_move.x, player_move.y, opp);
+        opp_move.set(board);
+        opp_score = evaluate_board(board, opp) + capture_score(board, opp);
+        opp_move.unset(board);
+    }
+
+    player_move.set(board);
+    let player_score = evaluate_board(board, player_move.player) + capture_score(board, player_move.player);
+    player_move.unset(board);
+
+    return player_score - opp_score;
+}
+
+
 
 pub fn get_moves(board: &mut Board, player: i32) ->  Vec<BoardMove> {
     
     // Try All Adjacent 
-    let mut moves : Vec<(BoardMove, i32)> = Vec::new();
-    let mut best_score = std::i32::MIN;
+    let mut offensive_moves : Vec<(BoardMove, i32)> = Vec::new();
+    let mut defensive_moves : Vec<(BoardMove, i32)> = Vec::new();
     for x in 0..board.size {
         for y in 0..board.size {            
             if is_candidate(board, x as i32, y as i32, player) {
                 let mut candidate = BoardMove::new(x, y, player);
-                candidate.set(board);
-                let score = get_final_score(board, player);
-                if score > best_score {
-                    best_score = score;
+                let score = evaluate_move(board, &mut candidate);
+                if score >= 0 {
+                    offensive_moves.push((candidate, score));
                 }
-                candidate.unset(board);
-                moves.push((candidate, score));
+                else {
+                    defensive_moves.push((candidate, score));
+                }
             }
         }
     }
 
-    // Sort candidates based on score.
-    moves.sort_by(|a, b| b.1.cmp(&a.1)); 
-    let mut sorted = Vec::new();
-    for m in moves {
-        sorted.push(m.0);
-    }/* 
-    // Remove unlikely nodes in depth
-    if sorted.len() > CANDIDATE_SELECT {
-        sorted = sorted[0..CANDIDATE_SELECT].to_vec();
+    // Sort candidates based on score (Offense / Defense).
+    offensive_moves.sort_by(|a, b| b.1.cmp(&a.1)); 
+    let mut o_sorted = Vec::new();
+
+    defensive_moves.sort_by(|a, b| a.1.cmp(&b.1)); 
+    let mut d_sorted = Vec::new();
+
+    for m in offensive_moves {
+        o_sorted.push(m.0);
     }
+    if o_sorted.len() > CANDIDATE_SELECT {
+        o_sorted = o_sorted[0..CANDIDATE_SELECT].to_vec();
+    }
+    
+    
+    for m in defensive_moves {
+        d_sorted.push(m.0);
+    }
+    if d_sorted.len() > CANDIDATE_SELECT {
+        d_sorted = d_sorted[0..CANDIDATE_SELECT].to_vec();
+    }
+    
+    o_sorted.extend(d_sorted);
+    
     // Add random at end.
     let r_move = get_random_move(board, player);
     if r_move.x != -1 {
-        sorted.push(r_move);
+        o_sorted.push(r_move);
     }
-    */
-    return sorted;
+    return o_sorted;
 }

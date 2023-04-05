@@ -101,6 +101,7 @@ impl AppState {
 
 fn load_tt_table() -> HashMap<String, (i32, i32, i32)> {
     if Path::new(&TT_PATH).exists() {
+        println!("Found Transposition Table!");
         let file = File::open(TT_PATH).unwrap();
         let reader = BufReader::new(file);
         let tt = serde_json::from_reader(reader).unwrap();

@@ -84,7 +84,7 @@ pub fn alpha_beta_minimax(
 ) -> (i32, i32, i32) {
 
      // Transposition Table
-    let board_hash = board.get_hash();
+    let board_hash = board.get_hash() + if maximizing {"M"} else {"m"};
     if let Some(entry) = tt.get(&board_hash) {
         return (entry.0, entry.1, entry.2)
     }

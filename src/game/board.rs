@@ -102,30 +102,30 @@ impl Board {
         map.insert("0xxxx0".to_string(), (10000, false));
         
         // --- Dead Four
-        map.insert("oxxxx0".to_string(), (500, true));
-        map.insert("0x0xxx0".to_string(), (500, true));
-        map.insert("0xx0xx0".to_string(), (500, false));
+        map.insert("xxxx0".to_string(), (5000, true));
+        map.insert("0x0xxx0".to_string(), (5000, true));
+        map.insert("0xx0xx0".to_string(), (5000, false));
         
         // --- Live Three
-        map.insert("0xxx0".to_string(), (150, false));
+        map.insert("0xxx0".to_string(), (750, false));
         
         // --- Dead Three
         map.insert("0xx0x0".to_string(), (10, true));
-        map.insert("oxxx0".to_string(), (10, true));
-        map.insert("oxx0x0".to_string(), (10, true));
-        map.insert("ox0xx0".to_string(), (10, true));
+        map.insert("xxx0".to_string(), (10, true));
+        map.insert("xx0x0".to_string(), (10, true));
+        map.insert("x0xx0".to_string(), (10, true));
         map.insert("0xx00x0".to_string(), (10, true));
         map.insert("0x0x0x0".to_string(), (10, false));
-        map.insert("o0xxx0o".to_string(), (10, false));
+        map.insert("0xxx0o".to_string(), (10, false));
         
         // --- Live Two
         map.insert("0x000x0".to_string(), (50, false));
         map.insert("0x00x0".to_string(), (50, false));
         map.insert("0x0x0".to_string(), (50, false));
         // --- Dead Two
-        map.insert("oxx0".to_string(), (1, true));
-        map.insert("ox0x0".to_string(), (1, true));
-        map.insert("ox00x0".to_string(), (1, true));
+        map.insert("xx0".to_string(), (1, true));
+        map.insert("x0x0".to_string(), (1, true));
+        map.insert("x00x0".to_string(), (1, true));
         map.insert("0xx0".to_string(), (1, false));
         
         map
@@ -209,6 +209,7 @@ impl Board {
     
     // Main Logic & Rules for Gomoku.
     pub fn is_legal_move(&mut self, x: i32, y: i32, player : i32) -> bool {
+        
         if !self.is_valid(x, y) {
             return false;
         }
