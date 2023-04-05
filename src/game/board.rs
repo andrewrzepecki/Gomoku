@@ -99,10 +99,10 @@ impl Board {
         map.insert("xxxxx".to_string(), (100000, false));
         
         // --- Live Four
-        map.insert("0xxxx0".to_string(), (10000, false));
+        map.insert("0xxxx0".to_string(), (50000, false));
         
         // --- Dead Four
-        map.insert("xxxx0".to_string(), (5000, true));
+        map.insert("xxxx0".to_string(), (10000, true));
         map.insert("0x0xxx0".to_string(), (5000, true));
         map.insert("0xx0xx0".to_string(), (5000, false));
         

@@ -1,9 +1,11 @@
 
 
+
 #[cfg(test)]
 pub mod tests {
 
     extern crate gomoku;
+
     use gomoku::*;
 
     fn build_test(pieces: Vector<BoardPiece>) -> impl Widget<AppState> {
@@ -80,5 +82,37 @@ pub mod tests {
             launcher
             .launch(initial_state)
             .expect("launch failed");
+    }
+    #[test]
+    pub fn test_heuristic() {
+        let mut data = AppState::default();
+        let mut turn = 0;
+        let mut player = PLAYER1_STATE;
+        let pieces = data.reset();
+        let mut tt: std::collections::HashMap<String, (i32, i32, i32)> =  std::collections::HashMap::new();
+        let mut turns = 0; 
+        let mut flag = true;
+        data.game_mode = "AIvAI".into();
+        while flag {
+            let (x, y, score) = alpha_beta_minimax(
+                &mut data.board,
+                data.turn,
+                DEPTH,
+                true,
+                -10000000,
+                10000000, 
+                &mut tt
+            );
+            let mut m = BoardMove::new(x, y, player);
+            if data.board.is_legal_move(x, y, player) {
+                m.set(&mut data.board);
+            }
+            player = data.board.get_opponent(player);
+            turn += 1;
+            if data.board.game_over(player) {
+                flag = false;
+            }
+        }
+        println!("Winner is player {} after {} turns", data.board.return_winner(), turns);
     }
 }
