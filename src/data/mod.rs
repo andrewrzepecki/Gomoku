@@ -25,6 +25,8 @@ pub struct AppState {
     pub winner_opened : bool,
     #[data(eq)]
     pub tt : HashMap<String, (i32, i32, i32)>,
+    pub is_test : bool,
+    pub test_score : i32,
 }
 
 impl Default for AppState {
@@ -67,6 +69,8 @@ impl Default for AppState {
             sugested : None,
             winner_opened : false,
             tt : load_tt_table(),
+            is_test : false,
+            test_score : 0,
         }
     }
 }
@@ -84,6 +88,13 @@ impl AppState {
         self.sugested = None;
         self.winner_opened = false;
         pieces
+    }
+
+    pub fn test(&mut self) -> Vector<BoardPiece> {
+        self.game_mode = "PvP".into();
+        self.is_test = true;
+        self.test_score = 0;
+        return self.reset();
     }
 }
 

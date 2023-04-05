@@ -1,3 +1,5 @@
+use std::hash::Hash;
+
 use crate::{*, data::save_tt_table};
 
 pub struct Goban {
@@ -19,15 +21,15 @@ impl Widget<AppState> for Goban {
     
     // Main Event Handler for all game changes.
     fn event(&mut self, ctx: &mut EventCtx, event: &Event, data: &mut AppState, env : &Env) {
-
         // Check If Game Over. 
-        if data.board.game_over(data.turn) {
+        if !data.is_test && data.board.game_over(data.turn) {
             let window = WindowDesc::new(build_winner())
                 .title(LocalizedString::new("Game Over"))
                 .resizable(false)
                 .window_size(Size::new(600.0, 450.0)
             );
             data.winner = data.board.return_winner();
+            println!("{}", data.winner);
             ctx.new_window(window);
             save_tt_table(&mut data.tt);
             ctx.window().close();
@@ -36,12 +38,27 @@ impl Widget<AppState> for Goban {
         
         // Place Piece on board if player is AI.
         if data.is_ai[(data.turn - 1) as usize] {
+            
             println!("------Running algo");
-            
-            
-            //let _move = mtdf(&mut data.board, data.turn, DEPTH, &mut data.tt, 1000);
-            let _move = alpha_beta_negamax(&mut data.board, data.turn, DEPTH, -10000000, 10000000, &mut HashMap::new());
-         
+            //let _move = mtdf(&mut data.board, data.turn, DEPTH, &mut data.tt, 0);
+            //let _move = alpha_beta_negamax(
+            //    &mut data.board,
+            //    data.turn,
+            //    DEPTH,
+            //    -10000000,
+            //    10000000, 
+            //    &mut data.tt
+            //);
+            let _move = alpha_beta_minimax(
+                &mut data.board,
+                data.turn,
+                DEPTH,
+                true,
+                -10000000,
+                10000000, 
+                &mut data.tt
+            );
+            println!("move score: {}", _move.2);
             update_board(data, _move.0, _move.1);
         }
         // Give Control to player if User.
@@ -152,15 +169,16 @@ pub fn update_board(data: &mut AppState, x: i32, y: i32) {
     let mut m = BoardMove::new(x, y, data.turn);
     m.set(&mut data.board);
     data.captures[(data.turn - 1) as usize] = data.board.captures[(data.turn - 1) as usize];
-    
+
     // Change turn
-    data.turn = data.board.get_opponent(data.turn); 
-    
+    if !data.is_test {
+        data.turn = data.board.get_opponent(data.turn); 
+    }
     // Get Sugested Move from AI.
     if !data.is_ai[(data.turn - 1) as usize] && data.game_mode == "PvP" {
         println!("-----------       Running algo");
         //let ai_move = alpha_beta_negamax(&mut data.board, data.turn, DEPTH, std::i32::MIN + 2, std::i32::MAX - 2, &mut HashMap::new());
-        let ai_move = mtdf(&mut data.board, data.turn, DEPTH, &mut data.tt, 0);
-        data.sugested = Some((ai_move.0, ai_move.1));
+        //let ai_move = mtdf(&mut data.board, data.turn, DEPTH, &mut data.tt, 0);
+        data.sugested = Some((-1, -1));
     }
 }

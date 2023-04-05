@@ -1,15 +1,13 @@
 use crate::*;
-
 /*
     Main evaluate board heuristics: Add score for each pattern on board.
- */
+*/
 
 pub fn evaluate_board(board: &mut Board, player: i32) -> i32 {
     
     let mut score: i32 = 0;
     let opp_player = board.get_opponent(player);
     
-    // Score Winner
     for line in board.get_lines() {
 
         // Scan Every Line for pattern.
@@ -18,6 +16,7 @@ pub fn evaluate_board(board: &mut Board, player: i32) -> i32 {
             // Change pattern to current player values.
             let p = pattern.replace("x", &format!("{}", player));
             let p = p.replace("o", &format!("{}", opp_player));
+            
             score += board.count_line_occurrences(&line, &p) * value.0;
             
             // Non-symetrical
@@ -27,35 +26,26 @@ pub fn evaluate_board(board: &mut Board, player: i32) -> i32 {
             }
         }
     }
-
-    // Score Captures
-    score += board.captures[(player - 1) as usize] * 10000;
+    //score += board.captures[(player - 1) as usize] * 1000;
     score
 }
 
+
+pub fn get_final_score(board: &mut Board, player: i32) -> i32 {
+    let opp = board.get_opponent(player);
+    let player_score = evaluate_board(board, player) + capture_score(board, player);
+    let opp_score = evaluate_board(board, opp) + capture_score(board, opp);
+    return player_score - ((opp_score as f64) * OPPONENT_WEIGHT).round() as i32;
+}
+
+pub fn capture_score(board: &mut Board, player: i32) -> i32 {
+    return board.captures[(player - 1) as usize] * 1000;
+}
 
 /*
     Candidate proposal: Return only viable move candidates in order of evaluate_board
     result.
- */
-
-pub fn evaluate_candidate(board: &mut Board, x: i32, y: i32, player: i32) -> i32 {
-    let mut score = 0;
-    //let opp_player = board.get_opponent(player);
-    for n in board.get_neighbours(x, y) {
-        if board[(n.0, n.1)] == player {
-            let (xd, yd) = board.get_delta((x, y), (n.0, n.1));
-            let mut i = 1;
-            score += 1; 
-            while board.is_valid(n.0 + (xd * i), n.1 + (yd * i)) && board[(n.0 + (xd * i), n.1 + (yd * i))] == player {
-                i += 1;
-                score += 1;
-            }
-        }
-    }
-    score
-}
-
+*/
 
 pub fn is_candidate(board: &mut Board, x: i32, y: i32, player: i32) -> bool {
     if board.is_legal_move(x, y, player) {
@@ -68,16 +58,55 @@ pub fn is_candidate(board: &mut Board, x: i32, y: i32, player: i32) -> bool {
     false
 }
 
+
+pub fn get_random_move(board: &mut Board, player: i32) -> BoardMove {
+    
+    let mut best_x = -1;
+    let mut best_y = -1;
+    
+    for i in 0..board.size {
+        for j in 0..board.size {
+            if board.is_legal_move(i, j, player) {
+                let mut count = 0;
+                for (x, y) in board.get_neighbours(i, j) {
+                    if board[(x, y)] == UNPLAYED_STATE {
+                        count += 1;
+                    }
+                }
+                if count == 8 {
+                    best_x = i;
+                    best_y = j;
+                    for (x, y) in board.get_neighbours(i, j) {
+                        if board[(x, y)] == UNPLAYED_STATE {
+                            count += 1;
+                        }
+                    }
+                    if count >= 24 {
+                        return BoardMove::new(best_x, best_y, player);
+                    }
+                }
+            }
+        }
+    }
+    return BoardMove::new(best_x, best_y, player);
+}
+
+
+
 pub fn get_moves(board: &mut Board, player: i32) ->  Vec<BoardMove> {
     
+    // Try All Adjacent 
     let mut moves : Vec<(BoardMove, i32)> = Vec::new();
-
+    let mut best_score = std::i32::MIN;
     for x in 0..board.size {
         for y in 0..board.size {            
             if is_candidate(board, x as i32, y as i32, player) {
                 let mut candidate = BoardMove::new(x, y, player);
                 candidate.set(board);
-                let score = evaluate_board(board, player);
+                let score = get_final_score(board, player);
+                if score > best_score {
+                    best_score = score;
+                }
                 candidate.unset(board);
                 moves.push((candidate, score));
             }
@@ -85,10 +114,20 @@ pub fn get_moves(board: &mut Board, player: i32) ->  Vec<BoardMove> {
     }
 
     // Sort candidates based on score.
-    moves.sort_by(|a, b| a.1.cmp(&b.1)); 
+    moves.sort_by(|a, b| b.1.cmp(&a.1)); 
     let mut sorted = Vec::new();
     for m in moves {
         sorted.push(m.0);
+    }/* 
+    // Remove unlikely nodes in depth
+    if sorted.len() > CANDIDATE_SELECT {
+        sorted = sorted[0..CANDIDATE_SELECT].to_vec();
     }
+    // Add random at end.
+    let r_move = get_random_move(board, player);
+    if r_move.x != -1 {
+        sorted.push(r_move);
+    }
+    */
     return sorted;
 }

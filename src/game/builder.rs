@@ -108,7 +108,7 @@ fn build_game(pieces: Vector<BoardPiece>) -> impl Widget<AppState> {
 }
 
 
-fn format_duration(duration: Duration) -> String {
+pub fn format_duration(duration: Duration) -> String {
     
     let millis = duration.as_millis() % 1000;
     let seconds = duration.as_secs() % 60;

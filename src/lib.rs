@@ -22,9 +22,14 @@ pub use druid::WidgetExt;
 
 // Globals for default values.
 pub const BOARDSIZE : i32 = 19;
+pub const MAX_CAPTURES : i32 = 10;
 pub const UNPLAYED_STATE : i32 = 0;
 pub const PLAYER1_STATE : i32 = 1;
 pub const PLAYER2_STATE : i32 = 2;
-pub const DEPTH : i32 = 3;
-pub const MAX_CAPTURES : i32 = 10;
 pub const TT_PATH : &str = "./tt.json";
+
+// Algorithm HyperParameters.
+pub const DEPTH : i32 = 2;
+pub const CANDIDATE_SELECT : usize = 4;
+pub const WARMP_UP : usize = 8;
+pub const OPPONENT_WEIGHT : f64 = 0.75;

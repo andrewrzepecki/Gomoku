@@ -3,7 +3,7 @@ use crate::*;
 
 // Implementation of a Board move to easily play and unplay moves.
 //
-
+#[derive(Clone)]
 pub struct BoardMove {
     pub x : i32,
     pub y : i32,
@@ -99,34 +99,34 @@ impl Board {
         map.insert("xxxxx".to_string(), (100000, false));
         
         // --- Live Four
-        map.insert("0xxxx0".to_string(), (50000, false));
+        map.insert("0xxxx0".to_string(), (10000, false));
         
         // --- Dead Four
-        map.insert("oxxxx0".to_string(), (5000, true));
-        map.insert("0x0xxx0".to_string(), (5000, true));
-        map.insert("0xx0xx0".to_string(), (5000, false));
+        map.insert("oxxxx0".to_string(), (500, true));
+        map.insert("0x0xxx0".to_string(), (500, true));
+        map.insert("0xx0xx0".to_string(), (500, false));
         
         // --- Live Three
-        map.insert("0xxx0".to_string(), (5000, false));
+        map.insert("0xxx0".to_string(), (150, false));
         
         // --- Dead Three
-        map.insert("0xx0x0".to_string(), (100, true));
-        map.insert("oxxx0".to_string(), (100, true));
-        map.insert("oxx0x0".to_string(), (100, true));
-        map.insert("ox0xx0".to_string(), (100, true));
-        map.insert("0xx00x0".to_string(), (100, true));
-        map.insert("0x0x0x0".to_string(), (100, false));
-        map.insert("o0xxx0o".to_string(), (100, false));
+        map.insert("0xx0x0".to_string(), (10, true));
+        map.insert("oxxx0".to_string(), (10, true));
+        map.insert("oxx0x0".to_string(), (10, true));
+        map.insert("ox0xx0".to_string(), (10, true));
+        map.insert("0xx00x0".to_string(), (10, true));
+        map.insert("0x0x0x0".to_string(), (10, false));
+        map.insert("o0xxx0o".to_string(), (10, false));
         
         // --- Live Two
-        map.insert("0x000x0".to_string(), (500, false));
-        map.insert("0x00x0".to_string(), (500, false));
-        map.insert("0x0x0".to_string(), (500, false));
+        map.insert("0x000x0".to_string(), (50, false));
+        map.insert("0x00x0".to_string(), (50, false));
+        map.insert("0x0x0".to_string(), (50, false));
         // --- Dead Two
-        map.insert("oxx0".to_string(), (10, true));
-        map.insert("ox0x0".to_string(), (10, true));
-        map.insert("ox00x0".to_string(), (10, true));
-        map.insert("0xx0".to_string(), (10, false));
+        map.insert("oxx0".to_string(), (1, true));
+        map.insert("ox0x0".to_string(), (1, true));
+        map.insert("ox00x0".to_string(), (1, true));
+        map.insert("0xx0".to_string(), (1, false));
         
         map
     }
@@ -139,7 +139,14 @@ impl Board {
             .map(|i| i.to_string())
             .collect::<Vec<String>>()
             .join(separator);
-        board_str
+
+        // Adding captures for each players makes hash and game state unique.
+        let capture_str = self.captures
+            .iter()
+            .map(|i| i.to_string())
+            .collect::<Vec<String>>()
+            .join(separator);
+        board_str + &capture_str
     }
 
     pub fn get_lines(&self) -> Vec<String> {
@@ -274,8 +281,21 @@ impl Board {
     pub fn is_double_three(&mut self, x: i32, y: i32, player: i32) -> bool {
         
         self[(x, y)] = player;
-        let count = self.count_free_open_alignements_of(3, player)
-         + self.count_free_closed_alignements_of(3, player);
+        
+        let open_pattern = "0x0xx0";
+        let closed_pattern = "0xxx0";
+        let open_pattern = open_pattern.replace("x", &format!("{}", player));
+        
+        let closed_pattern = closed_pattern.replace("x", &format!("{}", player));
+        
+        
+        let rp = open_pattern.chars().rev().collect::<String>();
+        let mut count = 0;
+        for line in self.get_lines() {
+            count += self.count_line_occurrences(&line, &open_pattern);
+            count += self.count_line_occurrences(&line, &closed_pattern);
+            count += self.count_line_occurrences(&line, &rp);
+        }
         self[(x, y)] = UNPLAYED_STATE;
         return if count > 1 {true} else {false}
     }
@@ -296,15 +316,28 @@ impl Board {
         
     pub fn return_winner(&self) -> i32 {
         // Check Five
-        for x in 0..self.size {
-            for y in 0..self.size {
-                if self[(x, y)] != UNPLAYED_STATE {
-                    if self.is_winner(x as i32, y as i32, self[(x, y)]) {
-                        return self[(x, y)];
-                    }
-                }
-            }
+        let pattern_one = format!(
+            "{}",
+            1.to_string().as_str().repeat(5 as usize),
+        );
+        let pattern_two = format!(
+            "{}",
+            2.to_string().as_str().repeat(5 as usize),
+        );
+        let mut one_count = 0;
+        let mut two_count = 0;
+        let all_lines = self.get_lines(); 
+        for lt in all_lines {
+            one_count += self.count_line_occurrences(&lt, &pattern_one);
+            two_count += self.count_line_occurrences(&lt, &pattern_two);
         }
+        if one_count > 0 {
+            return PLAYER1_STATE;
+        }
+        else if two_count > 0 {
+            return PLAYER2_STATE;
+        }
+        
         // Check Captures
         let mut winner = UNPLAYED_STATE;
         if self.captures[0] >= MAX_CAPTURES {
@@ -316,42 +349,6 @@ impl Board {
         winner
     }
 
-    
-    
-    pub fn is_winner(&self, x : i32, y : i32, player : i32) -> bool {
-        
-        for n in self.get_neighbours(x, y) {
-            if self[(n.0, n.1)] == player {
-                let mut same_count = 2;
-                for i in 2..self.size {
-                    let x_sym = x + ((n.0 - x) * i);
-                    let y_sym = y + ((n.1 - y) * i);
-                    if self.is_valid(x_sym, y_sym) {
-                        if self[(x_sym, y_sym)] != player {
-                            break;
-                        }
-                        same_count += 1;
-                    }
-                }
-                for i in 1..self.size {
-                    let x_sym = x + ((n.0 - x) * -i);
-                    let y_sym = y + ((n.1 - y) * -i);
-                    if self.is_valid(x_sym, y_sym) {
-                        if self[(x_sym, y_sym)] != player {
-                            break;
-                        }
-                        same_count += 1;
-                    }
-                }
-                if same_count > 4 {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    
     
     pub fn not_playable(&mut self, player : i32) -> bool {
     
@@ -406,7 +403,6 @@ impl Board {
     }
 
     
-    
     pub fn get_opponent(&self, player: i32) -> i32 {
         if player == PLAYER1_STATE {PLAYER2_STATE} else {PLAYER1_STATE}    
     }
@@ -415,139 +411,6 @@ impl Board {
         let dx = p2.0 - p1.0;
         let dy = p2.1 - p1.1;
         return (dx, dy);
-    }
-
-    pub fn count_free_open_alignements_of(&self, of: i32, player: i32) -> i32 {
-        
-        let mut alignements = 0;
-        for x in 0..self.size {
-            for y in 0..self.size {
-
-                if self[(x, y)] == UNPLAYED_STATE {
-                    for n in self.get_neighbours(x, y) {
-                        
-                        // Count on the line from current black + player number of players and blanks.
-                        if self[(n.0, n.1)] == player {
-                            let mut player_count = 1;
-                            let mut blank_count = 0;
-                            let (dx, dy) = self.get_delta((x, y), (n.0, n.1));
-                            for i in 1..of {
-                                let check_x = n.0 + (dx * i);
-                                let check_y = n.1 + (dy * i);
-                                if self.is_valid(check_x, check_y) {
-                                    if self[(check_x, check_y)] == player {
-                                        player_count += 1;
-                                    }
-                                    else {
-                                        blank_count += 1;
-                                    }
-                                }
-                            }
-                            
-                            // If all were player, check for following blank.
-                            // If has one blank and all remaining player, check for next two to be player and blank.
-                            if player_count == (of - 1) && blank_count == 1 {
-                                let final_x = n.0 + (dx * of);
-                                let final_y = n.1 + (dy * of);
-                                if self.is_valid(final_x, final_y) {
-                                    if self[(final_x, final_y)] == player {
-                                        let blank_x = n.0 + (dx * (of + 1));
-                                        let blank_y = n.1 + (dy * (of + 1));
-                                        if self.is_valid(blank_x, blank_y) {
-                                            if self[(final_x, final_y)] == UNPLAYED_STATE {
-                                                alignements += 1;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // All alignements will be counted twice, so return half.
-        return alignements / 2 as i32;
-    }
-
-    pub fn count_free_closed_alignements_of(&self, of: i32, player: i32) -> i32 {
-        let pattern = format!(
-            "{}{}{}",
-            UNPLAYED_STATE,
-            player.to_string().as_str().repeat(of as usize),
-            UNPLAYED_STATE
-        );
-        let mut count = 0;
-        let all_lines = self.get_lines(); 
-        for lt in all_lines {
-            count += self.count_line_occurrences(&lt, &pattern);
-        }
-        return count;
-    }
-
-    pub fn count_blocked_closed_alignements_of(&self, of: i32, player: i32) -> i32 {
-        let pattern = format!(
-            "{}{}{}",
-            UNPLAYED_STATE,
-            player.to_string().as_str().repeat(of as usize),
-            self.get_opponent(player)
-        );
-        let anti_pattern = pattern.chars().rev().collect::<String>();
-        let mut count = 0;
-        let all_lines = self.get_lines(); 
-        for lt in all_lines {
-            count += self.count_line_occurrences(&lt, &pattern);
-            count += self.count_line_occurrences(&lt, &anti_pattern);
-        }
-        return count;
-    }
-
-
-    pub fn count_blocked_open_alignements_of(&self, of: i32, player: i32) -> i32 {
-        
-        let mut alignements = 0;
-        for x in 0..self.size {
-            for y in 0..self.size {
-
-                if self[(x, y)] == UNPLAYED_STATE {
-                    for n in self.get_neighbours(x, y) {
-                        
-                        // Count on the line from current black + player number of players and blanks.
-                        if self[(n.0, n.1)] == player {
-                            let mut player_count = 1;
-                            let mut blank_count = 0;
-                            let (dx, dy) = self.get_delta((x, y), (n.0, n.1));
-                            for i in 1..of {
-                                let check_x = n.0 + (dx * i);
-                                let check_y = n.1 + (dy * i);
-                                if self.is_valid(check_x, check_y) {
-                                    if self[(check_x, check_y)] == player {
-                                        player_count += 1;
-                                    }
-                                    else {
-                                        blank_count += 1;
-                                    }
-                                }
-                            }
-                            // If all were player, check for following blank.
-                            // If has one blank and all remaining player, check for next two to be player and blank.
-                            if player_count == (of - 1) && blank_count == 1 {
-                                let final_x = n.0 + (dx * of);
-                                let final_y = n.1 + (dy * of);
-                                if self.is_valid(final_x, final_y) {
-                                    if self[(final_x, final_y)] == self.get_opponent(player) {
-                                        alignements += 1;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return alignements;
     }
 }
 
