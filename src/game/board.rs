@@ -10,6 +10,7 @@ pub struct BoardMove {
     pub player : i32,
     pub to_remove: Vec<(i32, i32)>,
     pub set : bool,
+    pub score : i32,
 }
 
 impl BoardMove {
@@ -20,6 +21,7 @@ impl BoardMove {
             player : player,
             to_remove : Vec::new(),
             set : false,
+            score : 0, 
         }
     }
 
@@ -59,6 +61,8 @@ pub struct Board {
     pub board: Vec<i32>,
     #[data(eq)]
     pub captures : Vec<i32>,
+    //#[data(eq)]
+    //pub offset_captures : Vec<i32>,
     #[data(eq)]
     pub score_table : HashMap<String, (i32, bool)>,
 }

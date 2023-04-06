@@ -22,7 +22,7 @@ pub fn alpha_beta_negamax(
         return (-1, -1, score);
     }
 
-    let mut best_pos: (i32, i32) = (-1, -1);
+    let mut best_move = BoardMove::new(-1, -1, 0);
     let mut best_score = std::i32::MIN + 2;
 
     // Get moves in order.
@@ -41,7 +41,7 @@ pub fn alpha_beta_negamax(
         
         // Evaluate the move recursively
         let (_, _, score) = alpha_beta_negamax(
-            board,
+            &mut board.clone(),
             board.get_opponent(player),
             depth - 1,
             -beta,
@@ -56,7 +56,7 @@ pub fn alpha_beta_negamax(
         let score = -score;
         if score > best_score {
             best_score = score;
-            best_pos = (m.x.clone(), m.y.clone());
+            best_move = m.clone();
             best_i = i;
         }
         
@@ -70,6 +70,6 @@ pub fn alpha_beta_negamax(
 
     // Insert Entry into
     //tt.insert(board_hash, (best_pos.0, best_pos.1, best_score));
-    println!("Proposition number: {}/{} best!", best_i, len);
-    return (best_pos.0, best_pos.1, best_score);
+    println!("Proposition number: {}/{} best | score : {}", best_i, len, best_move.score);
+    return (best_move.x, best_move.y, best_score);
 }

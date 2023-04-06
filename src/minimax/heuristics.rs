@@ -161,34 +161,32 @@ pub fn get_random_move(board: &mut Board, player: i32) -> BoardMove {
 pub fn get_moves(board: &mut Board, player: i32) ->  Vec<BoardMove> {
     
     // Try All Adjacent 
-    let mut offensive_moves : Vec<(BoardMove, i32)> = Vec::new();
+    let mut offensive_moves : Vec<BoardMove> = Vec::new();
     for x in 0..board.size {
         for y in 0..board.size {            
             if is_candidate(board, x as i32, y as i32, player) {
                 let mut candidate = BoardMove::new(x, y, player);
-                let score = evaluate_move(board, &mut candidate);
-                offensive_moves.push((candidate, score));
+                candidate.set(board);
+                candidate.score = get_final_score(board, player);// evaluate_move(board, &mut candidate);
+                candidate.unset(board);
+                offensive_moves.push(candidate);
             }
         }
     }
 
     // Sort candidates based on score (Offense / Defense).
-    offensive_moves.sort_by(|a, b| a.1.cmp(&b.1)); 
-    let mut o_sorted = Vec::new();
+    offensive_moves.sort_by(|a, b| b.score.cmp(&a.score)); 
 
 
-    for m in offensive_moves {
-        o_sorted.push(m.0);
-    }
-    if o_sorted.len() > CANDIDATE_SELECT {
-        o_sorted = o_sorted[0..CANDIDATE_SELECT].to_vec();
+    if offensive_moves.len() > CANDIDATE_SELECT {
+        offensive_moves = offensive_moves[0..CANDIDATE_SELECT].to_vec();
     }
     
     
     // Add random at end.
     let r_move = get_random_move(board, player);
     if r_move.x != -1 {
-        o_sorted.push(r_move);
+        offensive_moves.push(r_move);
     }
-    return o_sorted;
+    return offensive_moves;
 }

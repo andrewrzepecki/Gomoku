@@ -41,7 +41,7 @@ impl Default for AppState {
             board : Board::new(BOARDSIZE),
             captures: Vec::from([0,0]),
             winner : 0,
-            game_mode : "PvP".into(),
+            game_mode : GAME_MODE.into(),
             colors : Vec::from(
                 [
                     Color::BLACK, 
