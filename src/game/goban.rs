@@ -19,26 +19,11 @@ impl Widget<AppState> for Goban {
     
     // Main Event Handler for all game changes.
     fn event(&mut self, ctx: &mut EventCtx, event: &Event, data: &mut AppState, env : &Env) {
-        // Check If Game Over. 
-        if !data.is_test && data.board.game_over(data.turn) {
-            let window = WindowDesc::new(build_winner())
-                .title(LocalizedString::new("Game Over"))
-                .resizable(false)
-                .window_size(Size::new(600.0, 450.0)
-            );
-            data.winner = data.board.return_winner();
-            ctx.new_window(window);
-            //let ten_secs = core::time::Duration::from_millis(10000);
-            //std::thread::sleep(ten_secs);
-            ctx.window().close();
-            save_tt_table(&mut data.tt);
-            return;
-        }
         
         // Place Piece on board if player is AI.
         if data.is_ai[(data.turn - 1) as usize] {
             let best_move = get_best_move(data);
-            update_board(data, best_move.0, best_move.1);
+            update_board(data, best_move.0, best_move.1, ctx);
         }
         // Give Control to player if User.
         else {
@@ -137,7 +122,7 @@ impl Widget<AppState> for Goban {
 
 
 // Update User Interface with a valid move.
-pub fn update_board(data: &mut AppState, x: i32, y: i32) {
+pub fn update_board(data: &mut AppState, x: i32, y: i32, ctx: &mut EventCtx) {
     
     // Stop Timer
     data.last_move_duration = Instant::now().duration_since(data.last_move_time);
@@ -148,6 +133,20 @@ pub fn update_board(data: &mut AppState, x: i32, y: i32) {
     let mut m = BoardMove::new(x, y, data.turn);
     m.set(&mut data.board);
     data.captures[(data.turn - 1) as usize] = data.board.captures[(data.turn - 1) as usize];
+
+    if close_game_conditions(data) {
+            let window = WindowDesc::new(build_winner())
+                .title(LocalizedString::new("Game Over"))
+                .resizable(false)
+                .window_size(Size::new(600.0, 450.0)
+            );
+            data.winner = data.board.return_winner();
+            data.winner_opened = true;
+            ctx.new_window(window);
+            save_tt_table(&mut data.tt);
+            ctx.window().close();
+            return;
+        }
 
     // Change turn
     if !data.is_test {
@@ -165,4 +164,12 @@ pub fn update_board(data: &mut AppState, x: i32, y: i32) {
         //let ai_move = mtdf(&mut data.board, data.turn, DEPTH, &mut data.tt, 0);
         data.sugested = Some((-1, -1));
     }
+}
+
+
+fn close_game_conditions(data: &mut AppState) -> bool {
+    if !data.is_test && data.board.game_over(data.turn) && !data.winner_opened {
+        return true;
+    }
+    false
 }

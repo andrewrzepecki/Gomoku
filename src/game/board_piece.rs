@@ -27,7 +27,7 @@ impl Widget<AppState> for BoardPiece {
     
     // Main Event Handler for User Moves.
     fn event(&mut self,
-        _ctx: &mut EventCtx,
+        ctx: &mut EventCtx,
         event: &Event,
         data: &mut AppState,
         _env: &Env
@@ -35,7 +35,7 @@ impl Widget<AppState> for BoardPiece {
         if let Event::MouseDown(event) = event {
             if (self.position - event.pos).hypot() <= self.radius {
                 if data.board.is_legal_move(self.x, self.y, data.turn) {
-                    update_board(data, self.x, self.y);
+                    update_board(data, self.x, self.y, ctx);
                 }
             }
         }

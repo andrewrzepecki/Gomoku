@@ -24,7 +24,7 @@ pub struct AppState {
     pub sugested : Option<(i32, i32)>,
     pub winner_opened : bool,
     #[data(eq)]
-    pub tt : HashMap<String, (i32, i32, i32)>,
+    pub tt : HashMap<String, (i32, i32)>,
     pub is_test : bool,
     pub player1_score : i32,
     pub player2_score : i32,
@@ -103,7 +103,7 @@ impl AppState {
 }
 
 
-fn load_tt_table() -> HashMap<String, (i32, i32, i32)> {
+fn load_tt_table() -> HashMap<String, (i32, i32)> {
     if Path::new(&TT_PATH).exists() {
         println!("Found Transposition Table!");
         let file = File::open(TT_PATH).unwrap();
@@ -117,7 +117,7 @@ fn load_tt_table() -> HashMap<String, (i32, i32, i32)> {
     }
 }
 
-pub fn save_tt_table(tt: &mut HashMap<String, (i32, i32, i32)>) {
+pub fn save_tt_table(tt: &mut HashMap<String, (i32, i32)>) {
     // Open a file for writing
     let file = File::create(TT_PATH).unwrap();
     let writer = BufWriter::new(file);

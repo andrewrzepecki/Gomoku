@@ -1,7 +1,7 @@
 use crate::*;
 
 
-pub fn mtdf(board: &mut Board, player: i32, depth: i32, tt: &mut HashMap<String, (i32, i32, i32)>, f: i32) -> (i32, i32, i32) {
+pub fn mtdf(board: &mut Board, player: i32, depth: i32, tt: &mut HashMap<String, (i32, i32)>, f: i32) -> (i32, i32, i32) {
     
     let mut g = f;
     let mut x = -1;

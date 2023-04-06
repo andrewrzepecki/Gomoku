@@ -82,9 +82,25 @@ pub fn build_menu() -> impl Widget<AppState> {
 
 fn build_game(pieces: Vector<BoardPiece>) -> impl Widget<AppState> {
 
+
+    let settings_button = Button::new("Settings")
+            .on_click(
+            |ctx, data: &mut AppState, _| {
+                // Reset AppState & launch new window.
+                ctx.window().close();
+                let _ = data.reset();
+                let settings_window = WindowDesc::new(build_menu())
+                    .title(LocalizedString::new("Gomoku Settings"))
+                    .resizable(false)
+                    .window_size(Size::new(600.0, 450.0)
+                );
+                ctx.new_window(settings_window);
+            }
+        );
+
     let game_data_col = Flex::column()
         .with_flex_child(Label::new(
-            |data: &AppState, _env: &Env| {format!("Current Player: {}", data.turn)}
+            |data: &AppState, _env: &Env| {format!("Current Player: {}", data.color_names[if data.turn == PLAYER1_STATE {data.player1_color as usize} else {data.player2_color as usize}])}
         ).with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE)), 1.0)
         .with_flex_child(Label::new(
             |data: &AppState, _env: &Env| {format!("Player one captures: {}", data.captures[0])}
@@ -98,7 +114,8 @@ fn build_game(pieces: Vector<BoardPiece>) -> impl Widget<AppState> {
             })
             .with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE))
             .border(Color::BLACK, 1.0)
-            .center(), 1.0);
+            .center(), 1.0)
+        .with_flex_child(settings_button, 1.0);
 
     let col = Flex::column()
         .with_flex_child(Label::new("Gomoku").with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE)), 1.0)

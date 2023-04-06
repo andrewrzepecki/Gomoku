@@ -7,14 +7,8 @@ pub fn alpha_beta_negamax(
     depth: i32,
     mut alpha: i32,
     beta: i32,
-    tt: &mut HashMap<String, (i32, i32, i32)>,
+    tt: &mut HashMap<String, (i32, i32)>,
 ) -> (i32, i32, i32) {
-    
-    // Transposition Table
-    let board_hash = board.get_hash(player, depth);
-    //if let Some(entry) = tt.get(&board_hash) {
-    //    return (entry.0, entry.1, entry.2)
-    //}
     
     // Return Score
     if depth == 0 || board.game_over(player) {
@@ -22,14 +16,11 @@ pub fn alpha_beta_negamax(
         return (-1, -1, score);
     }
 
-    let mut best_move = BoardMove::new(-1, -1, 0);
+    let mut best_move = (-1, -1);
     let mut best_score = std::i32::MIN + 2;
 
     // Get moves in order.
-    let mut i = 0;
-    let mut best_i = 0;
-    let moves = get_moves(board, player);
-    let len = moves.len();
+    let moves = get_moves(board, player, tt);
     for mut m in moves {
         
         // Play the move
@@ -60,8 +51,7 @@ pub fn alpha_beta_negamax(
         let score = -score;
         if score > best_score {
             best_score = score;
-            best_move = m.clone();
-            best_i = i;
+            best_move = (m.x, m.y);
         }
         
         // Apply alpha-beta pruning
@@ -69,11 +59,11 @@ pub fn alpha_beta_negamax(
         if alpha >= beta {
             break;
         }
-        i += 1;
     }
 
     // Insert Entry into
-    tt.insert(board.get_hash(player, depth), (best_move.x, best_move.y, best_score));
-    //println!("Proposition number: {}/{} best | score : {}", best_i, len, best_move.score);
-    return (best_move.x, best_move.y, best_score);
+    if depth != 1 {
+        tt.insert(board.get_hash(player), (best_move.0, best_move.1));
+    }
+    return (best_move.0, best_move.1, best_score);
 }

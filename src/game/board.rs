@@ -82,8 +82,6 @@ impl IndexMut<(i32, i32)> for Board {
     }
 }
 
-
-
 impl Board {
     
     pub fn new(size: i32) -> Board {
@@ -126,6 +124,7 @@ impl Board {
         map.insert("0x000x0".to_string(), (50, false));
         map.insert("0x00x0".to_string(), (50, false));
         map.insert("0x0x0".to_string(), (50, false));
+        
         // --- Dead Two
         map.insert("xx0".to_string(), (10, true));
         map.insert("x0x0".to_string(), (10, true));
@@ -135,7 +134,7 @@ impl Board {
         map
     }
     
-    pub fn get_hash(&self, player: i32, depth: i32) -> String {
+    pub fn get_hash(&self, player: i32) -> String {
 
         let separator = "";
         let board_str = self.board
@@ -145,12 +144,7 @@ impl Board {
             .join(separator);
 
         // Adding captures for each players makes hash and game state unique.
-        let capture_str = self.captures
-            .iter()
-            .map(|i| i.to_string())
-            .collect::<Vec<String>>()
-            .join(separator);
-        board_str + &capture_str + &player.to_string().as_str() + &depth.to_string().as_str()
+        board_str + &player.to_string().as_str()
     }
 
     pub fn get_lines(&self) -> Vec<String> {
@@ -210,7 +204,7 @@ impl Board {
         windows.filter(|window| window.eq(&subvec.as_bytes())).count() as i32
     }
 
-    
+     
     // Main Logic & Rules for Gomoku.
     pub fn is_legal_move(&mut self, x: i32, y: i32, player : i32) -> bool {
         
@@ -239,7 +233,18 @@ impl Board {
         return true;
     }
 
-
+    pub fn get_legal_moves(&mut self, player: i32) -> Vec<BoardMove> {
+        let mut legals = Vec::new();
+        
+        for index in 0..self.size*self.size {
+            let x = index / self.size;
+            let y = index % self.size;
+            if self.is_legal_move(x, y, player) {
+                legals.push(BoardMove::new(x, y, player));
+            }
+        }
+        legals
+    }
     
     pub fn return_captured(&self, x : i32, y : i32, player : i32) -> Vec<(i32, i32)> {
         let opp_player = self.get_opponent(player);
@@ -261,7 +266,6 @@ impl Board {
     }
 
     
-    
     pub fn is_illegal_capture(&self, x: i32, y: i32, player: i32) -> bool {
         let opp_player = self.get_opponent(player);
         for n in self.get_neighbours(x, y) {
@@ -279,7 +283,6 @@ impl Board {
         }
         return false;
     }
-
 
 
     /// check if moves triggers an illegal double free three.
@@ -322,6 +325,9 @@ impl Board {
             return true;
         }
         if self.not_playable(player) {
+            return true;
+        }
+        if self.get_legal_moves(player).len() == 0 {
             return true;
         }
         return false;
