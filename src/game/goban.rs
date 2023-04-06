@@ -28,8 +28,10 @@ impl Widget<AppState> for Goban {
             );
             data.winner = data.board.return_winner();
             ctx.new_window(window);
-            save_tt_table(&mut data.tt);
+            //let ten_secs = core::time::Duration::from_millis(10000);
+            //std::thread::sleep(ten_secs);
             ctx.window().close();
+            save_tt_table(&mut data.tt);
             return;
         }
         

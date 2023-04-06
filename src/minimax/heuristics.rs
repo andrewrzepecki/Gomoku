@@ -33,25 +33,39 @@ pub fn evaluate_board(board: &mut Board, player: i32) -> i32 {
 
 pub fn get_final_score(board: &mut Board, player: i32) -> i32 {
     let opp = board.get_opponent(player);
+    
     let player_score = evaluate_board(board, player) + capture_score(board, player);
+    
     let opp_score = evaluate_board(board, opp) + capture_score(board, opp);
+    
     return player_score - ((opp_score as f64) * OPPONENT_WEIGHT).round() as i32;
 }
 
 
 pub fn capture_score(board: &mut Board, player: i32) -> i32 {
-    return board.captures[(player - 1) as usize] * 1300;
+    let v = 1.152 * board.captures[(player - 1) as usize] as f64;
+    let value = (2.718281828461 as f64).powf(v).round() as i32;
+    //if board.captures[(player - 1) as usize] >= 10 {
+    //    return 100000
+    //}
+    return value;
 }
 
 
 pub fn evaluate_move(board : &mut Board, player_move: &mut BoardMove) -> i32 {
     
-    let c_score = evaluate_board(board, player_move.player) + capture_score(board, player_move.player);
+    //let c_score = evaluate_board(board, player_move.player) + capture_score(board, player_move.player);
     player_move.set(board);
-    let move_score = evaluate_board(board, player_move.player) + capture_score(board, player_move.player);
-    player_move.unset(board);
+    let opp = board.get_opponent(player_move.player);
 
-    return c_score - move_score;
+    let player_score = evaluate_board(board, player_move.player) + capture_score(board, player_move.player);
+    
+    let opp_score = evaluate_board(board, opp) + capture_score(board, opp);
+    player_move.unset(board);
+    
+    return player_score - ((opp_score as f64) * 1.2).round() as i32;
+    
+
 }
 
 pub fn is_candidate(board: &mut Board, x: i32, y: i32, player: i32) -> bool {
@@ -166,9 +180,9 @@ pub fn get_moves(board: &mut Board, player: i32) ->  Vec<BoardMove> {
         for y in 0..board.size {            
             if is_candidate(board, x as i32, y as i32, player) {
                 let mut candidate = BoardMove::new(x, y, player);
-                candidate.set(board);
-                candidate.score = get_final_score(board, player);// evaluate_move(board, &mut candidate);
-                candidate.unset(board);
+                //candidate.set(board);
+                candidate.score = evaluate_move(board, &mut candidate);
+                //candidate.unset(board);
                 offensive_moves.push(candidate);
             }
         }
@@ -176,7 +190,6 @@ pub fn get_moves(board: &mut Board, player: i32) ->  Vec<BoardMove> {
 
     // Sort candidates based on score (Offense / Defense).
     offensive_moves.sort_by(|a, b| b.score.cmp(&a.score)); 
-
 
     if offensive_moves.len() > CANDIDATE_SELECT {
         let best_score = offensive_moves[0].score;
@@ -194,6 +207,23 @@ pub fn get_moves(board: &mut Board, player: i32) ->  Vec<BoardMove> {
         }
     }
     
+    /*if delta > 50 {
+        for i in 0..offensive_moves.len() {
+            if (offensive_moves[i].score) >= (min as f64 + (delta as f64) * 0.90).round() as i32 {
+                offset += 1;
+            }
+        }
+    }
+
+
+    if offset < CANDIDATE_SELECT {
+        let len = offensive_moves.len() as i32;
+        offset = CANDIDATE_SELECT;
+        offset = offset.min(len.try_into().unwrap());
+    }
+
+    offensive_moves = offensive_moves[0..offset].to_vec();
+    */
     
     // Add random at end.
     let r_move = get_random_move(board, player);

@@ -17,6 +17,6 @@ pub fn get_best_move(data: &mut AppState) -> (i32, i32, i32) {
     //            beta, 
     //            &mut data.tt
     //        );
-    println!("{}", best_move.2);
+    //println!("{}", best_move.2);
     return best_move
 }

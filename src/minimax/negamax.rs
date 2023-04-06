@@ -11,7 +11,7 @@ pub fn alpha_beta_negamax(
 ) -> (i32, i32, i32) {
     
     // Transposition Table
-    //let board_hash = board.get_hash(player);
+    let board_hash = board.get_hash(player, depth);
     //if let Some(entry) = tt.get(&board_hash) {
     //    return (entry.0, entry.1, entry.2)
     //}
@@ -73,7 +73,7 @@ pub fn alpha_beta_negamax(
     }
 
     // Insert Entry into
-    //tt.insert(board.get_hash(player), (best_move.x, best_move.y, -best_score));
-    println!("Proposition number: {}/{} best | score : {}", best_i, len, best_move.score);
+    tt.insert(board.get_hash(player, depth), (best_move.x, best_move.y, best_score));
+    //println!("Proposition number: {}/{} best | score : {}", best_i, len, best_move.score);
     return (best_move.x, best_move.y, best_score);
 }

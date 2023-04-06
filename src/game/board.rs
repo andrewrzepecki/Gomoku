@@ -135,7 +135,7 @@ impl Board {
         map
     }
     
-    pub fn get_hash(&self, player: i32) -> String {
+    pub fn get_hash(&self, player: i32, depth: i32) -> String {
 
         let separator = "";
         let board_str = self.board
@@ -150,7 +150,7 @@ impl Board {
             .map(|i| i.to_string())
             .collect::<Vec<String>>()
             .join(separator);
-        board_str + &capture_str + &player.to_string().as_str()
+        board_str + &capture_str + &player.to_string().as_str() + &depth.to_string().as_str()
     }
 
     pub fn get_lines(&self) -> Vec<String> {
