@@ -6,9 +6,9 @@ pub fn build_menu() -> impl Widget<AppState> {
     let board_size_label = Label::new(format!("{:width$}","Board Size", width=20)).with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE));
     let board_size_value = Label::new(|data: &AppState, _env: &Env| data.board_size.to_string()).with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE));
     let board_size_up_button = Button::new("+")
-        .on_click(|_ctx, data: &mut AppState, _env: &Env| { data.board_size = (data.board_size + 1).clamp(15, 30) });
+        .on_click(|_ctx, data: &mut AppState, _env: &Env| { data.board_size = (data.board_size + 1).clamp(8, 30) });
     let board_size_down_button = Button::new("-")
-        .on_click(|_ctx, data: &mut AppState, _env: &Env| { data.board_size = (data.board_size - 1).clamp(15, 30) });
+        .on_click(|_ctx, data: &mut AppState, _env: &Env| { data.board_size = (data.board_size - 1).clamp(8, 30) });
     let board_size_row = Flex::row()
         .with_flex_child(board_size_label, 1.0)
         .with_flex_child(board_size_down_button, 1.0)

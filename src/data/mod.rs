@@ -26,7 +26,8 @@ pub struct AppState {
     #[data(eq)]
     pub tt : HashMap<String, (i32, i32, i32)>,
     pub is_test : bool,
-    pub test_score : i32,
+    pub player1_score : i32,
+    pub player2_score : i32,
 }
 
 impl Default for AppState {
@@ -70,7 +71,8 @@ impl Default for AppState {
             winner_opened : false,
             tt : load_tt_table(),
             is_test : false,
-            test_score : 0,
+            player1_score : 0,
+            player2_score : 0,
         }
     }
 }
@@ -91,9 +93,11 @@ impl AppState {
     }
 
     pub fn test(&mut self) -> Vector<BoardPiece> {
+        self.board_size = 15;
         self.game_mode = "PvP".into();
         self.is_test = true;
-        self.test_score = 0;
+        self.player1_score = 0;
+        self.player2_score = 0;
         return self.reset();
     }
 }

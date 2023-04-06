@@ -99,7 +99,7 @@ impl Board {
         map.insert("xxxxx".to_string(), (100000, false));
         
         // --- Live Four
-        map.insert("0xxxx0".to_string(), (50000, false));
+        map.insert("0xxxx0".to_string(), (15000, false));
         
         // --- Dead Four
         map.insert("xxxx0".to_string(), (10000, true));
@@ -110,28 +110,28 @@ impl Board {
         map.insert("0xxx0".to_string(), (750, false));
         
         // --- Dead Three
-        map.insert("0xx0x0".to_string(), (10, true));
-        map.insert("xxx0".to_string(), (10, true));
-        map.insert("xx0x0".to_string(), (10, true));
-        map.insert("x0xx0".to_string(), (10, true));
-        map.insert("0xx00x0".to_string(), (10, true));
-        map.insert("0x0x0x0".to_string(), (10, false));
-        map.insert("0xxx0o".to_string(), (10, false));
+        map.insert("0xx0x0".to_string(), (100, true));
+        map.insert("xxx0".to_string(), (200, true));
+        map.insert("xx0x0".to_string(), (200, true));
+        map.insert("x0xx0".to_string(), (200, true));
+        map.insert("0xx00x0".to_string(), (200, true));
+        map.insert("0x0x0x0".to_string(), (200, false));
+        map.insert("0xxx0o".to_string(), (200, false));
         
         // --- Live Two
         map.insert("0x000x0".to_string(), (50, false));
         map.insert("0x00x0".to_string(), (50, false));
         map.insert("0x0x0".to_string(), (50, false));
         // --- Dead Two
-        map.insert("xx0".to_string(), (1, true));
-        map.insert("x0x0".to_string(), (1, true));
-        map.insert("x00x0".to_string(), (1, true));
-        map.insert("0xx0".to_string(), (1, false));
+        map.insert("xx0".to_string(), (10, true));
+        map.insert("x0x0".to_string(), (10, true));
+        map.insert("x00x0".to_string(), (10, true));
+        map.insert("0xx0".to_string(), (10, false));
         
         map
     }
     
-    pub fn get_hash(&self) -> String {
+    pub fn get_hash(&self, player: i32) -> String {
 
         let separator = "";
         let board_str = self.board
@@ -146,7 +146,7 @@ impl Board {
             .map(|i| i.to_string())
             .collect::<Vec<String>>()
             .join(separator);
-        board_str + &capture_str
+        board_str + &capture_str + &player.to_string().as_str()
     }
 
     pub fn get_lines(&self) -> Vec<String> {

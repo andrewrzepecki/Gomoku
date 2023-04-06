@@ -17,7 +17,7 @@ pub fn mtdf(board: &mut Board, player: i32, depth: i32, tt: &mut HashMap<String,
         } else {
             beta = g;
         }
-        (x, y, g) = alpha_beta_minimax(board, player, depth, true, beta - 1, beta, tt);
+        (x, y, g) = alpha_beta_negamax(board, player, depth, beta - 1, beta, tt);
         if g < beta {
             upper_bound = g;
         } else {

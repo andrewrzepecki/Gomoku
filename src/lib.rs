@@ -5,7 +5,7 @@ pub mod minimax;
 // Gomoku imports for main
 pub use data::AppState;
 pub use game::{goban::*, board::*, board_piece::*, builder::*};
-pub use minimax::{negamax::*, heuristics::*, mtdf::*};
+pub use minimax::{get_move::*, negamax::*, heuristics::*, mtdf::*};
 
 // Druid 0.8.3 imports
 pub use druid::{AppLauncher, LocalizedString, WindowDesc, Color, im::Vector, kurbo::Line, Point, Size, Data, EventCtx, Lens, Insets};
@@ -29,7 +29,7 @@ pub const PLAYER2_STATE : i32 = 2;
 pub const TT_PATH : &str = "./tt.json";
 
 // Algorithm HyperParameters.
-pub const DEPTH : i32 = 2;
-pub const CANDIDATE_SELECT : usize = 2;
+pub const DEPTH : i32 = 3;
+pub const CANDIDATE_SELECT : usize = 100;
 pub const WARMP_UP : usize = 8;
-pub const OPPONENT_WEIGHT : f64 = 1.00;
+pub const OPPONENT_WEIGHT : f64 = 0.90;
