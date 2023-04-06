@@ -305,7 +305,16 @@ impl Board {
         return if count > 1 {true} else {false}
     }
 
-    
+
+    pub fn has_live_four(&self, player : i32) -> bool {
+        let pattern = "0xxxx0";
+        let mut count = 0;
+        let fpattern = pattern.replace("x", &format!("{}", player));
+        for line in self.get_lines() {
+            count += self.count_line_occurrences(&line, &fpattern);
+        }
+        if count > 0 {true} else {false}
+    } 
     
     pub fn game_over(&mut self, player : i32) -> bool {
         

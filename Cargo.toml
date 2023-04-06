@@ -11,5 +11,5 @@ serde_json = "1.0.95"
 
 [dependencies.druid]
 version = "0.8.3"
-features = ["im", "svg", "image"]
+features = ["im"]
 

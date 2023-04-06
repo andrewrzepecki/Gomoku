@@ -40,7 +40,7 @@ pub fn get_final_score(board: &mut Board, player: i32) -> i32 {
 
 
 pub fn capture_score(board: &mut Board, player: i32) -> i32 {
-    return board.captures[(player - 1) as usize] * 1500;
+    return board.captures[(player - 1) as usize] * 1300;
 }
 
 
@@ -60,13 +60,13 @@ pub fn is_candidate(board: &mut Board, x: i32, y: i32, player: i32) -> bool {
             if board[(n.0, n.1)] != UNPLAYED_STATE {
                 return true;
             }
-            //else if board.is_legal_move(n.0, n.1, player){
-            //    for adj in board.get_neighbours(n.0, n.1) {
-            //        if board[(adj.0, adj.1)] != UNPLAYED_STATE {
-            //            return true;
-            //        }
-            //    }
-            //} 
+            else if board.is_legal_move(n.0, n.1, player){
+                for adj in board.get_neighbours(n.0, n.1) {
+                    if board[(adj.0, adj.1)] != UNPLAYED_STATE {
+                        return true;
+                    }
+                }
+            } 
         }
     }
     false
@@ -179,7 +179,19 @@ pub fn get_moves(board: &mut Board, player: i32) ->  Vec<BoardMove> {
 
 
     if offensive_moves.len() > CANDIDATE_SELECT {
-        offensive_moves = offensive_moves[0..CANDIDATE_SELECT].to_vec();
+        let best_score = offensive_moves[0].score;
+        let mut offset = 0;
+        for i in 0..offensive_moves.len() {
+            if offensive_moves[i].score == best_score {
+                offset += 1;
+            }
+        }
+        if offset > CANDIDATE_SELECT {
+            offensive_moves = offensive_moves[0..offset].to_vec();
+        }
+        else {
+            offensive_moves = offensive_moves[0..CANDIDATE_SELECT].to_vec();
+        }
     }
     
     

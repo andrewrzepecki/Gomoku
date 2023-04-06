@@ -38,6 +38,10 @@ pub fn alpha_beta_negamax(
             m.unset(board);
             return (m.x, m.y, 1000000);
         }
+        if board.has_live_four(board.get_opponent(player)) {
+            m.unset(board);  
+            continue;
+        }
         
         // Evaluate the move recursively
         let (_, _, score) = alpha_beta_negamax(
@@ -48,7 +52,7 @@ pub fn alpha_beta_negamax(
             -alpha,
             tt,
         );
-        
+
         // Undo the move
         m.unset(board);
         
@@ -69,7 +73,7 @@ pub fn alpha_beta_negamax(
     }
 
     // Insert Entry into
-    //tt.insert(board_hash, (best_pos.0, best_pos.1, best_score));
+    //tt.insert(board.get_hash(player), (best_move.x, best_move.y, -best_score));
     println!("Proposition number: {}/{} best | score : {}", best_i, len, best_move.score);
     return (best_move.x, best_move.y, best_score);
 }
