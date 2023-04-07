@@ -25,15 +25,18 @@ impl Widget<AppState> for Goban {
             close_game_window(data, ctx);
             return;
         }
-        if data.is_ai[(data.turn - 1) as usize] {
+        if data.is_ai[(data.turn - 1) as usize] && (!data.board.game_over(PLAYER1_STATE) && !data.board.game_over(PLAYER2_STATE)) {
             let best_move = get_best_move(data);
             update_board(data, best_move.0, best_move.1, ctx);
         }
         // Give Control to player if User.
-        else {
+        else if !data.board.game_over(PLAYER1_STATE) && !data.board.game_over(PLAYER2_STATE) {
             for p in self.pieces.iter_mut() {
                 p.event(ctx, event, data, env);
             }
+        }
+        else {
+            close_game_window(data, ctx);
         }
         ctx.request_paint();
     }
@@ -139,8 +142,8 @@ pub fn update_board(data: &mut AppState, x: i32, y: i32, ctx: &mut EventCtx) {
     data.captures[(data.turn - 1) as usize] = data.board.captures[(data.turn - 1) as usize];
 
     if close_game_conditions(data) {
-            close_game_window(data, ctx);
-            return;
+        close_game_window(data, ctx);
+        return;
     }
 
     // Change turn
@@ -179,7 +182,7 @@ fn close_game_window(data: &mut AppState, ctx: &mut EventCtx) {
             data.winner_opened = true;
             ctx.request_paint();
             ctx.new_window(window);
-            std::thread::sleep(std::time::Duration::from_secs(5));
+            std::thread::sleep(std::time::Duration::from_secs(3));
             save_tt_table(&mut data.tt);
             ctx.window().close();
 }

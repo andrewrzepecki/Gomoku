@@ -7,9 +7,19 @@ pub fn alpha_beta_negamax(
     depth: i32,
     mut alpha: i32,
     beta: i32,
-    tt: &mut HashMap<String, (i32, i32)>,
+    tt: &mut HashMap<String, (i32, i32, i32, i32, i32)>,
 ) -> (i32, i32, i32) {
-    
+
+    let board_hash = board.get_hash(player);
+    if let Some(&(x, y, s, a, b)) = tt.get(&board_hash) {
+        let best_move = BoardMove::new(x, y, player);
+        if board.is_legal_move(best_move.x, best_move.y, player) {
+            if a < beta || b > alpha {
+                return (x, y, s);
+            }
+        }
+    }
+
     // Return Score
     if depth == 0 || board.game_over(player) {
         let score = get_final_score(board, player);
@@ -20,7 +30,7 @@ pub fn alpha_beta_negamax(
     let mut best_score = std::i32::MIN + 2;
 
     // Get moves in order.
-    let moves = get_moves(board, player, tt);
+    let moves = get_moves(board, player);
     for mut m in moves {
         
         // Play the move
@@ -62,8 +72,8 @@ pub fn alpha_beta_negamax(
     }
 
     // Insert Entry into
-    if depth != 1 {
-        tt.insert(board.get_hash(player), (best_move.0, best_move.1));
+    if  best_move.0 != -1 {
+        tt.insert(board.get_hash(player), (best_move.0, best_move.1, best_score, alpha, beta));
     }
     return (best_move.0, best_move.1, best_score);
 }

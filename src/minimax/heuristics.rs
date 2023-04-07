@@ -84,18 +84,10 @@ pub fn get_random_move(board: &mut Board, player: i32) -> BoardMove {
 }
 
 
-pub fn get_moves(board: &mut Board, player: i32, tt: &mut HashMap<String, (i32, i32)>) ->  Vec<BoardMove> {
+pub fn get_moves(board: &mut Board, player: i32) ->  Vec<BoardMove> {
     
     // Try All Adjacent 
     let mut moves : Vec<BoardMove> = Vec::new();
-    let board_hash = board.get_hash(player);
-    if let Some(entry) = tt.get(&board_hash) {
-        let best_move = BoardMove::new(entry.0, entry.1, player);
-        if board.is_legal_move(best_move.x, best_move.y, player) {
-            moves.push(best_move);
-            return moves;
-        }
-    }
     
     for x in 0..board.size {
         for y in 0..board.size {            
