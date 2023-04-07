@@ -31,8 +31,8 @@ pub const PLAYER2_STATE : i32 = 2;
 pub const TT_PATH : &str = "./tt.json";
 
 // Algorithm HyperParameters.
-pub const DEPTH : i32 = 3;
-pub const CANDIDATE_SELECT : usize = 10;
+pub const DEPTH : i32 = 2;
+pub const CANDIDATE_SELECT : usize = 3;
 pub const WARMP_UP : usize = 8;
 pub const OPPONENT_WEIGHT : f64 = 1.00;
 pub const DEFENSE_WEIGHT : f64 = 1.10;

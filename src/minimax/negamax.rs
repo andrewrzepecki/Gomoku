@@ -12,8 +12,7 @@ pub fn alpha_beta_negamax(
 
     let board_hash = board.get_hash(player);
     if let Some(&(x, y, s, a, b)) = tt.get(&board_hash) {
-        let best_move = BoardMove::new(x, y, player);
-        if board.is_legal_move(best_move.x, best_move.y, player) {
+        if board.is_legal_move(x, y, player) {
             if a < beta || b > alpha {
                 return (x, y, s);
             }
