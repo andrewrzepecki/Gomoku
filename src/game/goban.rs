@@ -21,6 +21,10 @@ impl Widget<AppState> for Goban {
     fn event(&mut self, ctx: &mut EventCtx, event: &Event, data: &mut AppState, env : &Env) {
         
         // Place Piece on board if player is AI.
+        if close_game_conditions(data) {
+            close_game_window(data, ctx);
+            return;
+        }
         if data.is_ai[(data.turn - 1) as usize] {
             let best_move = get_best_move(data);
             update_board(data, best_move.0, best_move.1, ctx);
@@ -135,18 +139,9 @@ pub fn update_board(data: &mut AppState, x: i32, y: i32, ctx: &mut EventCtx) {
     data.captures[(data.turn - 1) as usize] = data.board.captures[(data.turn - 1) as usize];
 
     if close_game_conditions(data) {
-            let window = WindowDesc::new(build_winner())
-                .title(LocalizedString::new("Game Over"))
-                .resizable(false)
-                .window_size(Size::new(600.0, 450.0)
-            );
-            data.winner = data.board.return_winner();
-            data.winner_opened = true;
-            ctx.new_window(window);
-            save_tt_table(&mut data.tt);
-            ctx.window().close();
+            close_game_window(data, ctx);
             return;
-        }
+    }
 
     // Change turn
     if !data.is_test {
@@ -172,4 +167,19 @@ fn close_game_conditions(data: &mut AppState) -> bool {
         return true;
     }
     false
+}
+
+fn close_game_window(data: &mut AppState, ctx: &mut EventCtx) {
+    let window = WindowDesc::new(build_winner())
+                .title(LocalizedString::new("Game Over"))
+                .resizable(false)
+                .window_size(Size::new(600.0, 450.0)
+            );
+            data.winner = data.board.return_winner();
+            data.winner_opened = true;
+            ctx.request_paint();
+            ctx.new_window(window);
+            std::thread::sleep(std::time::Duration::from_secs(5));
+            save_tt_table(&mut data.tt);
+            ctx.window().close();
 }

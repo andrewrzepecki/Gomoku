@@ -59,7 +59,7 @@ pub fn evaluate_move(board : &mut Board, player_move: &mut BoardMove) -> i32 {
     let opp_score = evaluate_board(board, opp) + capture_score(board, opp);
     player_move.unset(board);
     
-    return player_score - ((opp_score as f64) * 1.2).round() as i32;
+    return player_score - ((opp_score as f64) * DEFENSE_WEIGHT).round() as i32;
 
 }
 
@@ -91,8 +91,8 @@ pub fn get_moves(board: &mut Board, player: i32, tt: &mut HashMap<String, (i32, 
     let board_hash = board.get_hash(player);
     if let Some(entry) = tt.get(&board_hash) {
         let best_move = BoardMove::new(entry.0, entry.1, player);
-        moves.push(best_move.clone());
         if board.is_legal_move(best_move.x, best_move.y, player) {
+            moves.push(best_move);
             return moves;
         }
     }
@@ -109,11 +109,6 @@ pub fn get_moves(board: &mut Board, player: i32, tt: &mut HashMap<String, (i32, 
 
     // Sort candidates based on score (Offense / Defense).
     moves.sort_by(|a, b| b.score.cmp(&a.score)); 
-    
-    for _m in moves.clone() {
-        println!("c_score: {}", _m.score);
-    }
-    println!("");
     if moves.len() > CANDIDATE_SELECT {
         let best_score = moves[0].score;
         let mut offset = 0;

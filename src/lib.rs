@@ -22,7 +22,7 @@ pub use druid::kurbo::Circle;
 pub use druid::WidgetExt;
 
 // Globals for default values.
-pub const BOARDSIZE : i32 = 10;
+pub const BOARDSIZE : i32 = 19;
 pub const GAME_MODE : &str = "PvAI";
 pub const MAX_CAPTURES : i32 = 10;
 pub const UNPLAYED_STATE : i32 = 0;
@@ -32,6 +32,7 @@ pub const TT_PATH : &str = "./tt.json";
 
 // Algorithm HyperParameters.
 pub const DEPTH : i32 = 3;
-pub const CANDIDATE_SELECT : usize = 6;
+pub const CANDIDATE_SELECT : usize = 3;
 pub const WARMP_UP : usize = 8;
 pub const OPPONENT_WEIGHT : f64 = 1.00;
+pub const DEFENSE_WEIGHT : f64 = 1.10;

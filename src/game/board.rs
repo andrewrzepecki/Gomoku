@@ -61,8 +61,6 @@ pub struct Board {
     pub board: Vec<i32>,
     #[data(eq)]
     pub captures : Vec<i32>,
-    //#[data(eq)]
-    //pub offset_captures : Vec<i32>,
     #[data(eq)]
     pub score_table : HashMap<String, (i32, bool)>,
 }
@@ -325,9 +323,7 @@ impl Board {
             return true;
         }
         if self.not_playable(player) {
-            return true;
-        }
-        if self.get_legal_moves(player).len() == 0 {
+            println!("Unplayable game, stopping ...");
             return true;
         }
         return false;
