@@ -7,14 +7,14 @@ use crate::*;
 pub struct BoardMove {
     pub x : i32,
     pub y : i32,
-    pub player : i32,
+    pub player : Players,
     pub to_remove: Vec<(i32, i32)>,
     pub set : bool,
     pub score : i32,
 }
 
 impl BoardMove {
-    pub fn new(x: i32, y: i32, player: i32) -> BoardMove {
+    pub fn new(x: i32, y: i32, player: Players) -> BoardMove {
         BoardMove {
             x : x,
             y : y,
@@ -30,9 +30,9 @@ impl BoardMove {
             self.to_remove = board.return_captured(self.x, self.y, self.player);
             for &(x, y) in &self.to_remove {
                 board[(x, y)] = UNPLAYED_STATE;
-                board.captures[(self.player - 1) as usize] += 1;
+                board.captures[self.player as usize] += 1;
             }
-            board[(self.x, self.y)] = self.player;
+            board[(self.x, self.y)] = self.player as i32;
             self.set = true;
         }
     }
@@ -40,8 +40,8 @@ impl BoardMove {
     pub fn unset(&mut self, board: &mut Board) {
         if self.set {
             for &(x, y) in &self.to_remove {
-                board[(x, y)] = board.get_opponent(self.player);
-                board.captures[(self.player - 1) as usize] -= 1;
+                board[(x, y)] = board.get_opponent(self.player) as i32;
+                board.captures[self.player as usize] -= 1;
             }
             board[(self.x, self.y)] = UNPLAYED_STATE;
             self.set = false;
@@ -132,7 +132,7 @@ impl Board {
         map
     }
     
-    pub fn get_hash(&self, player: i32) -> String {
+    pub fn get_hash(&self, player: Players) -> String {
 
         let separator = "";
         let board_str = self.board
@@ -142,7 +142,7 @@ impl Board {
             .join(separator);
 
         // Adding captures for each players makes hash and game state unique.
-        board_str + &player.to_string().as_str()
+        board_str + (player as usize).to_string().as_str()
     }
 
     pub fn get_lines(&self) -> Vec<String> {
@@ -204,7 +204,7 @@ impl Board {
 
      
     // Main Logic & Rules for Gomoku.
-    pub fn is_legal_move(&mut self, x: i32, y: i32, player : i32) -> bool {
+    pub fn is_legal_move(&mut self, x: i32, y: i32, player : Players) -> bool {
         
         if !self.is_valid(x, y) {
             return false;
@@ -215,9 +215,9 @@ impl Board {
         if self.is_illegal_capture(x, y, player) {
             return false;
         }
-        if self.is_double_three(x, y, player) {
-            return false;
-        }
+        //if self.is_double_three(x, y, player) {
+        //    return false;
+        //}
         return true; 
     }
 
@@ -231,7 +231,7 @@ impl Board {
         return true;
     }
 
-    pub fn get_legal_moves(&mut self, player: i32) -> Vec<BoardMove> {
+    pub fn get_legal_moves(&mut self, player: Players) -> Vec<BoardMove> {
         let mut legals = Vec::new();
         
         for index in 0..self.size*self.size {
@@ -244,17 +244,17 @@ impl Board {
         legals
     }
     
-    pub fn return_captured(&self, x : i32, y : i32, player : i32) -> Vec<(i32, i32)> {
+    pub fn return_captured(&self, x : i32, y : i32, player : Players) -> Vec<(i32, i32)> {
         let opp_player = self.get_opponent(player);
 
         for n in self.get_neighbours(x, y) {
-            if self[(n.0, n.1)] == opp_player {
+            if self[(n.0, n.1)] == opp_player  as i32 {
                 let x_sym = x + ((n.0 - x) * 2);
                 let y_sym = y + ((n.1 - y) * 2);
                 let x_opp = x + ((n.0 - x) * 3);
                 let y_opp = y + ((n.1 - y) * 3);
                 if self.is_valid(x_sym, y_sym) && self.is_valid(x_opp, y_opp) {
-                    if self[(x_sym, y_sym)] == opp_player && self[(x_opp, y_opp)] == player {
+                    if self[(x_sym, y_sym)] == opp_player as i32 && self[(x_opp, y_opp)] == player as i32 {
                         return vec![(x_sym, y_sym), ((n.0, n.1))];
                     }
                 }
@@ -264,16 +264,16 @@ impl Board {
     }
 
     
-    pub fn is_illegal_capture(&self, x: i32, y: i32, player: i32) -> bool {
+    pub fn is_illegal_capture(&self, x: i32, y: i32, player: Players) -> bool {
         let opp_player = self.get_opponent(player);
         for n in self.get_neighbours(x, y) {
-            if self[(n.0, n.1)] == player {
+            if self[(n.0, n.1)] == player as i32 {
                 let x_sym = x + ((n.0 - x) * 2);
                 let y_sym = y + ((n.1 - y) * 2);
                 let x_opp = x + ((n.0 - x) * -1);
                 let y_opp = y + ((n.1 - y) * -1);
                 if self.is_valid(x_sym, y_sym) && self.is_valid(x_opp, y_opp) {
-                    if self[(x_sym, y_sym)] == opp_player && self[(x_opp, y_opp)] == opp_player {
+                    if self[(x_sym, y_sym)] == opp_player as i32 && self[(x_opp, y_opp)] == opp_player as i32 {
                         return true;
                     }
                 }
@@ -284,15 +284,15 @@ impl Board {
 
 
     /// check if moves triggers an illegal double free three.
-    pub fn is_double_three(&mut self, x: i32, y: i32, player: i32) -> bool {
+    pub fn is_double_three(&mut self, x: i32, y: i32, player: Players) -> bool {
         
-        self[(x, y)] = player;
+        self[(x, y)] = player as i32;
         
         let open_pattern = "0x0xx0";
         let closed_pattern = "0xxx0";
-        let open_pattern = open_pattern.replace("x", &format!("{}", player));
+        let open_pattern = open_pattern.replace("x", &format!("{}", (player as usize).to_string()));
         
-        let closed_pattern = closed_pattern.replace("x", &format!("{}", player));
+        let closed_pattern = closed_pattern.replace("x", &format!("{}", (player as usize).to_string()));
         
         
         let rp = open_pattern.chars().rev().collect::<String>();
@@ -307,19 +307,19 @@ impl Board {
     }
 
 
-    pub fn has_live_four(&self, player : i32) -> bool {
+    pub fn has_live_four(&self, player : Players) -> bool {
         let pattern = "0xxxx0";
         let mut count = 0;
-        let fpattern = pattern.replace("x", &format!("{}", player));
+        let fpattern = pattern.replace("x", &format!("{}", (player as usize).to_string()));
         for line in self.get_lines() {
             count += self.count_line_occurrences(&line, &fpattern);
         }
         if count > 0 {true} else {false}
     } 
     
-    pub fn game_over(&mut self, player : i32) -> bool {
+    pub fn game_over(&mut self, player : Players) -> bool {
         
-        if self.return_winner() != UNPLAYED_STATE {
+        if self.return_winner() != None {
             return true;
         }
         if self.not_playable(player) {
@@ -330,7 +330,7 @@ impl Board {
     }
 
         
-    pub fn return_winner(&self) -> i32 {
+    pub fn return_winner(&self) -> Option<Players> {
         // Check Five
         let pattern_one = format!(
             "{}",
@@ -348,25 +348,25 @@ impl Board {
             two_count += self.count_line_occurrences(&lt, &pattern_two);
         }
         if one_count > 0 {
-            return PLAYER1_STATE;
+            return Some(Players::PlayerOne);
         }
         else if two_count > 0 {
-            return PLAYER2_STATE;
+            return Some(Players::PlayerTwo);
         }
         
         // Check Captures
-        let mut winner = UNPLAYED_STATE;
+        let mut winner: Option<Players> = None;
         if self.captures[0] >= MAX_CAPTURES {
-            winner = PLAYER1_STATE
+            winner = Some(Players::PlayerOne);
         }
         else if self.captures[1] >= MAX_CAPTURES {
-            winner = PLAYER1_STATE
+            winner = Some(Players::PlayerTwo);
         }
         winner
     }
 
     
-    pub fn not_playable(&mut self, player : i32) -> bool {
+    pub fn not_playable(&mut self, player : Players) -> bool {
     
         for x in 0..self.size {
             for y in 0..self.size {
@@ -419,14 +419,25 @@ impl Board {
     }
 
     
-    pub fn get_opponent(&self, player: i32) -> i32 {
-        if player == PLAYER1_STATE {PLAYER2_STATE} else {PLAYER1_STATE}    
+    pub fn get_opponent(&self, player: Players) -> Players {
+        if player == Players::PlayerOne {Players::PlayerTwo} else {Players::PlayerOne} 
     }
 
     pub fn get_delta(&self, p1: (i32, i32), p2: (i32, i32)) -> (i32, i32) {
         let dx = p2.0 - p1.0;
         let dy = p2.1 - p1.1;
         return (dx, dy);
+    }
+
+    
+    pub fn update_board(&self, data: &mut AppState, x: i32, y: i32) {
+        data.last_move_duration = Instant::now().duration_since(data.last_move_time);
+        data.last_move_time = Instant::now();
+        
+        
+        // Play Move
+        let mut m = BoardMove::new(x, y, data.turn);
+        m.set(&mut data.board);
     }
 }
 

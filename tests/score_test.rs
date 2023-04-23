@@ -84,4 +84,8 @@ pub mod tests {
             .launch(initial_state)
             .expect("launch failed");
     }
+
+    pub fn test_score() {
+        
+    }
 } 

@@ -1,10 +1,10 @@
-1. Rewrite builder.rs -> main_menu | winner_menu (add board unplayable board to it) | main_game | test_game 
+1. Rewrite builder.rs -> main_menu | winner_menu (add unplayable board to it) | main_game | test_game 
     - Add piece cursor
     - Add player color around board
 
 2. Rethink AppState
 
-2. Rewrite Game Loop for Goban -> Cleaner event loop.
+2. Rewrite Game Loop for Goban -> Cleaner event loop.h
     - Store moves
 
 3. Convert board to bitboard | change scanning method | Scan less store more efficiently
@@ -13,3 +13,4 @@
 
 5. Add zorbian hashtable with board mirroring for Transposition table.
 
+6. 

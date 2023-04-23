@@ -1,42 +1,41 @@
-use crate::{*, data::save_tt_table};
+use crate::*;
 
-pub struct Goban {
+pub struct Goban { 
+    // Widget child UI elements
     pieces : Vector<BoardPiece>,
+    // Main logic for game and rules
 }
 
 impl Goban {
-    pub fn new(pieces : Vector<BoardPiece>) -> Goban {
-        Goban {
-            pieces,
+    pub fn new(size: i32) -> Self {
+        Self {
+            pieces : build_pieces(size),
         }
+    }
+
+    pub fn dynamic(f: impl Fn(i32) -> i32, arg : i32) -> Self {
+        let size: i32 = f(arg);
+        Goban::new(size)
     }
 }
 
 /*
     Main Board Interface Widget. 
 */
+
 impl Widget<AppState> for Goban {
     
     // Main Event Handler for all game changes.
     fn event(&mut self, ctx: &mut EventCtx, event: &Event, data: &mut AppState, env : &Env) {
         
-        // Place Piece on board if player is AI.
-        if close_game_conditions(data) {
-            close_game_window(data, ctx);
-            return;
-        }
-        if data.is_ai[(data.turn - 1) as usize] && (!data.board.game_over(PLAYER1_STATE) && !data.board.game_over(PLAYER2_STATE)) {
-            let best_move = get_best_move(data);
-            update_board(data, best_move.0, best_move.1, ctx);
-        }
+
+        //if data.is_ai[data.turn as usize] {
+        //    let best_move = get_best_move(data);
+        //    data.board.update_board(data, best_move.0, best_move.1);
+        //}
         // Give Control to player if User.
-        else if !data.board.game_over(PLAYER1_STATE) && !data.board.game_over(PLAYER2_STATE) {
-            for p in self.pieces.iter_mut() {
-                p.event(ctx, event, data, env);
-            }
-        }
-        else {
-            close_game_window(data, ctx);
+        for p in self.pieces.iter_mut() {
+            p.event(ctx, event, data, env);
         }
         ctx.request_paint();
     }
@@ -59,6 +58,7 @@ impl Widget<AppState> for Goban {
         data: &AppState,
         env: &Env
     ) {
+       
         for p in self.pieces.iter_mut() {
             p.update(ctx, old_data, data, env);
         }
@@ -129,6 +129,7 @@ impl Widget<AppState> for Goban {
 
 
 // Update User Interface with a valid move.
+/* 
 pub fn update_board(data: &mut AppState, x: i32, y: i32, ctx: &mut EventCtx) {
     
     // Stop Timer
@@ -138,7 +139,7 @@ pub fn update_board(data: &mut AppState, x: i32, y: i32, ctx: &mut EventCtx) {
     
     // Play Move
     let mut m = BoardMove::new(x, y, data.turn);
-    m.set(&mut data.board);
+    m.set(&mut self.board);
     data.captures[(data.turn - 1) as usize] = data.board.captures[(data.turn - 1) as usize];
 
     if close_game_conditions(data) {
@@ -163,8 +164,9 @@ pub fn update_board(data: &mut AppState, x: i32, y: i32, ctx: &mut EventCtx) {
         data.sugested = Some((-1, -1));
     }
 }
+    */
 
-
+/*
 fn close_game_conditions(data: &mut AppState) -> bool {
     if !data.is_test && data.board.game_over(data.turn) && !data.winner_opened {
         return true;
@@ -185,4 +187,14 @@ fn close_game_window(data: &mut AppState, ctx: &mut EventCtx) {
             std::thread::sleep(std::time::Duration::from_secs(3));
             save_tt_table(&mut data.tt);
             ctx.window().close();
+}
+*/
+
+pub fn update_board(data: &mut AppState, m : &mut BoardMove) {
+    data.last_move_duration = Instant::now().duration_since(data.last_move_time);
+    data.last_move_time = Instant::now();
+    
+    // Play Move
+    m.set(&mut data.board);
+    data.turn = data.board.get_opponent(data.turn);
 }

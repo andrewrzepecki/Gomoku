@@ -1,25 +1,26 @@
 pub mod game;
 pub mod data;
-pub mod minimax;
+pub mod views;
+//pub mod minimax;
 
 // Gomoku imports for main
-pub use data::AppState;
-pub use game::{goban::*, board::*, board_piece::*, builder::*};
-pub use minimax::{get_move::*, negamax::*, heuristics::*, mtdf::*};
+pub use data::app_state::*;
+pub use views::{main_view::*, menu_view::*, game_view::*, end_view::*};
+pub use game::{goban::*, board::*, board_piece::*,};
+//pub use minimax::{get_move::*, negamax::*, heuristics::*, mtdf::*};
 
 // Druid 0.8.3 imports
-pub use druid::{AppLauncher, LocalizedString, WindowDesc, Color, im::Vector, kurbo::Line, Point, Size, Data, EventCtx, Lens, Insets};
+pub use druid::{AppLauncher, LocalizedString, WindowDesc, Color, Cursor, im::Vector, kurbo::{Line, Circle}, Point, Size, Data, EventCtx, Lens, Insets};
+pub use druid::{Widget, WidgetExt, widget::{Flex, Label, Align, Button, Controller, ViewSwitcher}, WidgetPod};
 pub use std::time::{Instant, Duration};
 use std::collections::HashMap;
 use rand::prelude::*;
+use core::fmt;
 use std::fs::File;
 use std::path::Path;
 use std::io::{BufWriter, BufReader};
 use core::ops::{IndexMut, Index};
 pub use druid::widget::prelude::*;
-pub use druid::{Widget, widget::{Flex, Label, Align, Button}};
-pub use druid::kurbo::Circle;
-pub use druid::WidgetExt;
 
 // Globals for default values.
 pub const BOARDSIZE : i32 = 19;
