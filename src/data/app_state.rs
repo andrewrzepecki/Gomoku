@@ -5,7 +5,7 @@ use crate::*;
 pub enum  GameState {
     Menu,
     Game,
-    GameOver,    
+    GameOver, 
 }
 
 impl Default for GameState {
@@ -13,8 +13,6 @@ impl Default for GameState {
         GameState::Menu
     }
 }
-
-
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum  GameMode {
@@ -39,6 +37,7 @@ impl fmt::Display for GameMode {
 
 #[derive(Clone, PartialEq, Eq, Copy)]
 pub enum  Players {
+    Unplayed,
     PlayerOne,
     PlayerTwo,
 }
@@ -56,11 +55,12 @@ impl Default for Players {
 }
 
 
-///    Main App State For Gomoku App,
-///'''
-///    let initial_state = AppState::Default()
-///    initial_state.reset()
-///'''
+
+//    Main App State For Gomoku App,
+//'''
+//    let initial_state = AppState::Default()
+//    initial_state.reset()
+//'''
 
 
 #[derive(Clone, Data, Lens)]
@@ -70,7 +70,7 @@ pub struct AppState {
 
 
 
-    pub board_size: i32,
+    pub board_size: usize,
     pub board : Board,
     #[data(eq)]
     pub turn : Players,

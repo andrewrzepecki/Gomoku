@@ -3,16 +3,17 @@ use crate::*;
 
 #[derive(Clone, Data)]
 pub struct BoardPiece {
-    x : i32,
-    y : i32,
+    x : usize,
+    y : usize,
     position : Point,
     radius: f64,
-    state : i32,
+    #[data(eq)]
+    state : Players,
 }
 
 
 impl BoardPiece {
-    pub fn new(x: i32, y:i32, position : Point, radius: f64, state : i32) -> BoardPiece {
+    pub fn new(x: usize, y:usize, position : Point, radius: f64, state : Players) -> BoardPiece {
         BoardPiece {
             x,
             y,
@@ -34,10 +35,10 @@ impl Widget<AppState> for BoardPiece {
     ) {
         if let Event::MouseDown(event) = event {
             if (self.position - event.pos).hypot() <= self.radius {
-                if data.board.is_legal_move(self.x, self.y, data.turn) {
-                    let turn = data.turn.clone();
-                    update_board(data, &mut BoardMove::new(self.x, self.y, turn));
-                }
+                //if data.board.is_legal(self.x, self.y, data.turn) {
+                //    let turn = data.turn.clone();
+                //    update_board(data, &mut BoardMove::new(self.x, self.y, turn));
+                //}
             }
         }
     }
@@ -57,7 +58,7 @@ impl Widget<AppState> for BoardPiece {
         data: &AppState,
         _env: &Env,
     ) {
-        self.state = data.board[(self.x, self.y)];
+        self.state = data.board.get_state(self.x, self.y);
     }
 
     fn layout(
@@ -88,22 +89,22 @@ impl Widget<AppState> for BoardPiece {
 }
 
 // Function to set color of the piece depeding on the AppState.
-fn get_piece_color(data : &mut AppState, x: i32, y: i32, state: i32) -> Color {
+fn get_piece_color(data : &mut AppState, x: usize, y: usize, state: Players) -> Color {
     let mut color = Color::TRANSPARENT;
-    if state != UNPLAYED_STATE {
-        color = if state == PLAYER1_STATE {data.colors[data.player_colors[0] as usize]} else {data.colors[data.player_colors[1] as usize]};
-    }
-    else {
-        color = if !data.board.is_legal_move(x, y, data.turn) {Color::rgba8(255, 0, 0, 50)} else {color};
-        if data.sugested != None {
-            color = if data.sugested.unwrap().0 == x && data.sugested.unwrap().1 == y {Color::rgba8(0, 255, 0, 50)} else {color};
-        }
-    }
+    //if state != UNPLAYED_STATE {
+    //    color = if state == PLAYER1_STATE {data.colors[data.player_colors[0] as usize]} else {data.colors[data.player_colors[1] as usize]};
+    //}
+    //else {
+    //    color = if !data.board.is_legal_move(x, y, data.turn) {Color::rgba8(255, 0, 0, 50)} else {color};
+    //    if data.sugested != None {
+    //        color = if data.sugested.unwrap().0 == x && data.sugested.unwrap().1 == y {Color::rgba8(0, 255, 0, 50)} else {color};
+    //    }
+    //}
     color  
 }
 
 
-pub fn build_pieces(size : i32) -> Vector<BoardPiece> {
+pub fn build_pieces(size : usize) -> Vector<BoardPiece> {
     
     let mut pieces = Vector::new();
     
@@ -112,11 +113,11 @@ pub fn build_pieces(size : i32) -> Vector<BoardPiece> {
             let point = Point::new(0.0, 0.0);
             let radius = 40.0;
             let piece: BoardPiece = BoardPiece::new(
-                x,
-                y,
+                x as usize,
+                y as usize,
                 point,
                 radius,
-                0,
+                Players::Unplayed,
             );
             pieces.push_back(piece);
         }

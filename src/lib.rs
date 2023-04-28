@@ -5,8 +5,8 @@ pub mod views;
 
 // Gomoku imports for main
 pub use data::app_state::*;
-pub use views::{main_view::*, menu_view::*, game_view::*, end_view::*};
-pub use game::{goban::*, board::*, board_piece::*,};
+pub use views::{main_view::*, menu_view::*, game_view::*, end_view::*, goban::*, board_piece::*, cursor::*};
+pub use game::{board::*,};
 //pub use minimax::{get_move::*, negamax::*, heuristics::*, mtdf::*};
 
 // Druid 0.8.3 imports
@@ -23,7 +23,7 @@ use core::ops::{IndexMut, Index};
 pub use druid::widget::prelude::*;
 
 // Globals for default values.
-pub const BOARDSIZE : i32 = 19;
+pub const BOARDSIZE : usize = 19;
 pub const GAME_MODE : &str = "PvAI";
 pub const MAX_CAPTURES : i32 = 10;
 pub const UNPLAYED_STATE : i32 = 0;

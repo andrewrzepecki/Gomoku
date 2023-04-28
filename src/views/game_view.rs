@@ -1,7 +1,9 @@
 use crate::*;
 
-
-pub fn game_view(board_size: i32) -> Flex<AppState> {
+// Needs argument to define board size:
+//    -> Breaks code pattern, would prefer to be able to give a closure to Goban::new()
+//        -> TODO: implement and test Goban::dynamic()
+pub fn game_view(board_size: usize) -> Flex<AppState> {
 
 
     let settings_button = Button::new("Settings")

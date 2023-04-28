@@ -7,7 +7,7 @@ pub struct Goban {
 }
 
 impl Goban {
-    pub fn new(size: i32) -> Self {
+    pub fn new(size: usize) -> Self {
         Self {
             pieces : build_pieces(size),
         }
@@ -15,7 +15,7 @@ impl Goban {
 
     pub fn dynamic(f: impl Fn(i32) -> i32, arg : i32) -> Self {
         let size: i32 = f(arg);
-        Goban::new(size)
+        Goban::new(size as usize)
     }
 }
 
@@ -28,11 +28,6 @@ impl Widget<AppState> for Goban {
     // Main Event Handler for all game changes.
     fn event(&mut self, ctx: &mut EventCtx, event: &Event, data: &mut AppState, env : &Env) {
         
-
-        //if data.is_ai[data.turn as usize] {
-        //    let best_move = get_best_move(data);
-        //    data.board.update_board(data, best_move.0, best_move.1);
-        //}
         // Give Control to player if User.
         for p in self.pieces.iter_mut() {
             p.event(ctx, event, data, env);
@@ -195,6 +190,6 @@ pub fn update_board(data: &mut AppState, m : &mut BoardMove) {
     data.last_move_time = Instant::now();
     
     // Play Move
-    m.set(&mut data.board);
-    data.turn = data.board.get_opponent(data.turn);
+    //m.set(&mut data.board);
+    //data.turn = data.board.get_opponent(data.turn);
 }
