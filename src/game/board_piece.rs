@@ -38,6 +38,11 @@ impl Widget<AppState> for BoardPiece {
                 if data.board.is_legal(self.x, self.y, data.turn) {
                     let mut m = BoardMove::new(self.x, self.y, data.turn);
                     m.set(&mut data.board);
+                    if data.board.is_winner(self.x, self.y, data.turn) {
+                        data.winner = Some(data.turn);
+                        data.game_state = GameState::GameOver;
+                        data.current_view = data.game_state as i32;
+                    }
                     data.turn = get_opponent(data.turn);
                     data.captures = data.board.captures;
                 }

@@ -1,56 +1,5 @@
 use crate::*;
 
-// Implementation of a Board move to easily play and unplay moves.
-#[derive(Clone)]
-pub struct BoardMove {
-    pub x : usize,
-    pub y : usize,
-    pub player : Players,
-    pub to_remove: [[i8; 2]; 2],
-    pub set : bool,
-    pub score : i32,
-}
-
-impl BoardMove {
-    pub fn new(x: usize, y: usize, player: Players) -> BoardMove {
-        BoardMove {
-            x : x,
-            y : y,
-            player : player,
-            to_remove : [[-1i8; 2]; 2],
-            set : false,
-            score : 0, 
-        }
-    }
-
-    pub fn set(&mut self, board: &mut Board) {
-        if !self.set {
-            self.to_remove = board.return_captured(self.x, self.y, self.player);
-            for add in self.to_remove {
-                if add[0] != -1 {
-                    board.set_state(add[0] as usize, add[1] as usize, Players::Unplayed);
-                    board.captures[self.player as usize] += 1;
-                }
-            }
-            board.set_state(self.x, self.y, self.player);
-            self.set = true;
-        }
-    }
-
-    pub fn unset(&mut self, board: &mut Board) {
-        if self.set {
-            for add in self.to_remove {
-                if add[0] != -1 {
-                    board.set_state(add[0] as usize, add[1] as usize, get_opponent(self.player));
-                    board.captures[self.player as usize] -= 1;
-                }
-            }
-            board.set_state(self.x, self.y, Players::Unplayed);
-            self.set = false;
-        }
-    }
-}
-
 // Main Gomoku Board Logic
 #[derive(Clone, Data)]
 pub struct Board {
@@ -64,6 +13,8 @@ pub struct Board {
     pub boards: [u64; BOARDSIZE],
     #[data(eq)]
     pub captures : [u64; 2],
+    #[data(eq)]
+    pub free_threes : [u64; 2],
     #[data(eq)]
     pub pattern_table : HashMap<String, HashMap<u64, (usize, i32)>>,
     #[data(eq)]
@@ -79,6 +30,7 @@ impl Board {
             bpr : size as u32 * BOARDSIZE as u32,
             boards : [0; BOARDSIZE],
             captures : [0; 2],
+            free_threes : [0; 2],
             pattern_table : make_pattern_table(),
             inverted_table : make_inverted_table(),
         }
@@ -91,9 +43,23 @@ impl Board {
     pub fn set_state(&mut self, x: usize, y: usize, player: Players) {
         set_u64_state(&mut self.boards[y], x, player);
     }
-
+    pub fn is_winner(&self, x: usize, y: usize, player : Players) -> bool {
+        let patterns = if player == Players::PlayerOne {&self.pattern_table["five_in_a_row"]} else {&self.inverted_table["five_in_a_row"]};
+        for (pattern, (len, score)) in patterns {
+            if self.scan_position(x, y, *pattern, *len) > 0 {
+                return true;
+            }
+        }
+        if self.captures[player as usize] >= MAX_CAPTURES  as u64 {
+            return true;
+        }
+        return false;
+    }
     pub fn is_legal(&mut self, x: usize, y: usize, player : Players) -> bool {
-        self.is_valid(x, y) && self.is_free(x, y) && !self.is_illegal_capture(x, y, player) && !self.is_illegal_double_three(x, y, player)
+        self.is_valid(x, y) &&
+        self.is_free(x, y) && 
+        !self.is_illegal_capture(x, y, player) && 
+        (self.free_threes[player as usize] + self.is_free_three(x, y, player) as u64) < 2
     }
 
     pub fn is_valid(&self, x: usize, y: usize) -> bool {
@@ -123,24 +89,21 @@ impl Board {
         false
     }
 
-    pub fn is_illegal_double_three(&mut self, x: usize, y: usize, player : Players) -> bool {
+    pub fn is_free_three(&mut self, x: usize, y: usize, player: Players) -> i32 {
         
-        let mut mv = BoardMove::new(x, y, player);
-        
-        mv.set(self);
-        
+        let mut count = 0;
         let mut patterns = &self.pattern_table["free_threes"];
         if player == Players::PlayerTwo {
-            patterns = &self.inverted_table["free_threes"];
+            patterns = &self.inverted_table["free_threes"]; 
         }
-        if self.scan_board(patterns) > 1 {
-            mv.unset(self);
-            return true;
+        set_u64_state(&mut self.boards[y], x, player); 
+        for (pattern, (len, _)) in  patterns {
+            for n in self.get_neighbors(x, y) {
+                count += self.scan_position(n.0, n.1, *pattern, *len);
+            }
         }
-        
-        mv.unset(self);
-        
-        return false;
+        set_u64_state(&mut self.boards[y], x, Players::Unplayed); 
+        count
     }
 
     pub fn get_neighbors(&self, x: usize, y: usize) -> impl Iterator<Item = (usize, usize)> {
@@ -184,7 +147,8 @@ impl Board {
     pub fn scan_position(&self, x: usize, y: usize, pattern: u64, len: usize) -> i32 {
         
         let mut count = 0;
-        
+        //let open = if get_u64_state(pattern, 0) == Players::Unplayed {true} else {false};
+        //let closed = if get_u64_state(pattern, len - 1) == Players::Unplayed {};
         if self.get_state(x, y) == get_u64_state(pattern, 0) {
             for n in self.get_neighbors(x, y) {
                 if self.get_state(n.0, n.1) == get_u64_state(pattern, 1) {

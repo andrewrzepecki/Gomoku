@@ -6,17 +6,18 @@ pub mod views;
 // Gomoku imports for main
 pub use data::app_state::*;
 pub use game::{
+    goban::*, 
+    board_piece::*, 
     board::*,
-    board_utils::*
+    board_move::*,
+    board_utils::*,
+    cursor::*
 };
 pub use views::{
     main_view::*,
     menu_view::*,
     game_view::*,
     end_view::*, 
-    goban::*, 
-    board_piece::*, 
-    cursor::*
 };
 //pub use minimax::{get_move::*, negamax::*, heuristics::*, mtdf::*};
 

@@ -55,14 +55,6 @@ impl Default for Players {
 }
 
 
-
-//    Main App State For Gomoku App,
-//'''
-//    let initial_state = AppState::Default()
-//    initial_state.reset()
-//'''
-
-
 #[derive(Clone, Data, Lens)]
 pub struct AppState {
     pub window_name: String,
@@ -145,8 +137,11 @@ impl Default for AppState {
 impl AppState {
     pub fn reset(&mut self) {
         self.last_move_duration = Instant::now().duration_since(Instant::now());
+        self.board = Board::new(BOARDSIZE);
         self.last_move_time = Instant::now();
         self.sugested = None;
+        self.turn = Players::PlayerOne;
+        self.winner = None;
     }
 
     pub fn change_cursor(&mut self, player : Players) {
