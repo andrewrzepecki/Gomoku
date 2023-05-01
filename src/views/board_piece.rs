@@ -28,17 +28,19 @@ impl Widget<AppState> for BoardPiece {
     
     // Main Event Handler for User Moves.
     fn event(&mut self,
-        ctx: &mut EventCtx,
+        _ctx: &mut EventCtx,
         event: &Event,
         data: &mut AppState,
         _env: &Env
     ) {
         if let Event::MouseDown(event) = event {
             if (self.position - event.pos).hypot() <= self.radius {
-                //if data.board.is_legal(self.x, self.y, data.turn) {
-                //    let turn = data.turn.clone();
-                //    update_board(data, &mut BoardMove::new(self.x, self.y, turn));
-                //}
+                if data.board.is_legal(self.x, self.y, data.turn) {
+                    let mut m = BoardMove::new(self.x, self.y, data.turn);
+                    m.set(&mut data.board);
+                    data.turn = get_opponent(data.turn);
+                    data.captures = data.board.captures;
+                }
             }
         }
     }
@@ -81,16 +83,20 @@ impl Widget<AppState> for BoardPiece {
         let y_delta = ctx.size().height / data.board_size as f64;
         let x = x_delta * (self.x as f64) + (x_delta / 2.0);
         let y = y_delta * (self.y as f64) + (y_delta / 2.0);
-        self.radius = (x_delta + y_delta) / 2.0 / 3.0;
+        self.radius = (x_delta + y_delta) / 4.750;
         self.position = Point::new(x, y);
-        let color = get_piece_color(&mut data.clone(), self.x, self.y, self.state);
+        let color = match self.state {
+            Players::Unplayed => Color::TRANSPARENT,
+            Players::PlayerOne => data.colors[data.player_colors[0] as usize],
+            Players::PlayerTwo => data.colors[data.player_colors[1] as usize],
+        };
         ctx.fill(Circle::new(self.position, self.radius), &color);
     }
 }
 
 // Function to set color of the piece depeding on the AppState.
-fn get_piece_color(data : &mut AppState, x: usize, y: usize, state: Players) -> Color {
-    let mut color = Color::TRANSPARENT;
+//fn get_piece_color(data : &mut AppState, x: usize, y: usize, state: Players) -> Color {
+//    let mut color = Color::TRANSPARENT;
     //if state != UNPLAYED_STATE {
     //    color = if state == PLAYER1_STATE {data.colors[data.player_colors[0] as usize]} else {data.colors[data.player_colors[1] as usize]};
     //}
@@ -100,8 +106,8 @@ fn get_piece_color(data : &mut AppState, x: usize, y: usize, state: Players) -> 
     //        color = if data.sugested.unwrap().0 == x && data.sugested.unwrap().1 == y {Color::rgba8(0, 255, 0, 50)} else {color};
     //    }
     //}
-    color  
-}
+    //color  
+//}
 
 
 pub fn build_pieces(size : usize) -> Vector<BoardPiece> {

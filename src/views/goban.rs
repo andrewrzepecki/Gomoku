@@ -53,7 +53,8 @@ impl Widget<AppState> for Goban {
         data: &AppState,
         env: &Env
     ) {
-       
+        if old_data.board.boards != data.board.boards {  
+        }
         for p in self.pieces.iter_mut() {
             p.update(ctx, old_data, data, env);
         }

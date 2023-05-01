@@ -35,11 +35,11 @@ impl fmt::Display for GameMode {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, Copy)]
+#[derive(Clone, PartialEq, Eq, Copy, Debug)]
 pub enum  Players {
-    Unplayed,
     PlayerOne,
     PlayerTwo,
+    Unplayed,
 }
 
 impl Players {
@@ -75,7 +75,7 @@ pub struct AppState {
     #[data(eq)]
     pub turn : Players,
     #[data(eq)]
-    pub captures : Vec<i32>,
+    pub captures : [u64; 2],
     #[data(eq)]
     pub winner: Option<Players>,
     #[data(eq)]
@@ -96,6 +96,7 @@ pub struct AppState {
     pub sugested : Option<(i32, i32)>,
 }
 
+
 impl Default for AppState {
     fn default() -> Self {
         AppState {
@@ -105,7 +106,7 @@ impl Default for AppState {
             board_size : BOARDSIZE,
             board: Board::new(BOARDSIZE),
             turn : Players::PlayerOne,
-            captures : vec![0, 0],
+            captures : [0, 0],
             winner : None,
             player_colors : vec![0, 1],
             game_state : GameState::Menu,
