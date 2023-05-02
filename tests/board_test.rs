@@ -35,7 +35,7 @@ pub mod tests {
         assert_eq!(first, Players::Unplayed);
         board.print();
         
-        for _ in 0..90000 {
+        for _ in 0..1000000 {
             board.set_state(8, 8, Players::PlayerTwo);
             first = board.get_state(8, 8);
             let _ = board.is_legal(0, 0, Players::PlayerOne);
