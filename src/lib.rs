@@ -4,7 +4,12 @@ pub mod views;
 //pub mod minimax;
 
 // Gomoku imports for main
-pub use data::app_state::*;
+pub use data::{
+    app_state::*,
+    game_mode::*,
+    game_state::*,
+    players::*
+};
 pub use game::{
     goban::*, 
     board_piece::*, 

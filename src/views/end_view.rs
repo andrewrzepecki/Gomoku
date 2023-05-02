@@ -1,7 +1,7 @@
 use crate::*;
 
 pub fn end_view() -> Flex<AppState> {
- 
+
     let winner_label = Label::new(|data: &AppState, _env: &Env| {format!("Player {} Wins!", (data.winner.unwrap() as usize).to_string())})
         .with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE));
     
@@ -38,5 +38,15 @@ pub fn end_view() -> Flex<AppState> {
         .with_flex_child(play_again_button, 1.0)
         .with_flex_child(settings_button, 1.0)
         .with_flex_child(exit_button, 1.0);
-    col
+
+    let pannel = Flex::row()
+        .with_flex_child(
+            // bottom left
+            col.center(), 1.0
+        )
+        .with_flex_child(
+            // bottom right
+            Goban::new(BOARDSIZE), 1.0
+        );
+    pannel
 }

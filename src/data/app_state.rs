@@ -1,67 +1,9 @@
 use crate::*;
 
-
-#[derive(Clone, PartialEq, Eq, Copy)]
-pub enum  GameState {
-    Menu,
-    Game,
-    GameOver, 
-}
-
-impl Default for GameState {
-    fn default() -> Self {
-        GameState::Menu
-    }
-}
-
-#[derive(Clone, PartialEq, Eq, Debug)]
-pub enum  GameMode {
-    PvP,
-    PvAI,
-    AIvAI,
-}
-
-impl Default for GameMode {
-    fn default() -> Self {
-        GameMode::PvAI
-    }
-}
-
-impl fmt::Display for GameMode {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
-        // or, alternatively:
-        // fmt::Debug::fmt(self, f)
-    }
-}
-
-#[derive(Clone, PartialEq, Eq, Copy, Debug)]
-pub enum  Players {
-    PlayerOne,
-    PlayerTwo,
-    Unplayed,
-}
-
-impl Players {
-    pub fn index(&self) -> usize {
-        *self as usize
-    }
-}
-
-impl Default for Players {
-    fn default() -> Self {
-        Players::PlayerOne
-    }
-}
-
-
 #[derive(Clone, Data, Lens)]
 pub struct AppState {
     pub window_name: String,
     pub current_view: i32,
-
-
-
     pub board_size: usize,
     pub board : Board,
     #[data(eq)]
@@ -155,23 +97,23 @@ impl AppState {
         else {
             self.cursor =  Cursor::NotAllowed;
         }
-        /* 
-        self.cursor = match self.cursor {
-            Cursor::Arrow => Cursor::IBeam,
-            Cursor::IBeam => Cursor::Pointer,
-            Cursor::Pointer => Cursor::Crosshair,
-            Cursor::Crosshair => Cursor::NotAllowed,
-            Cursor::NotAllowed => Cursor::ResizeLeftRight,
-            Cursor::ResizeLeftRight => Cursor::ResizeUpDown,
-            Cursor::ResizeUpDown => {
-                if let Some(custom) = &self.custom {
-                    custom.clone()
-                } else {
-                    Cursor::Arrow
-                }
-            }
-            Cursor::Custom(_) => Cursor::Arrow,
-            _ => Cursor::Arrow,
-        };*/
+
+        // self.cursor = match self.cursor {
+        //     Cursor::Arrow => Cursor::IBeam,
+        //     Cursor::IBeam => Cursor::Pointer,
+        //     Cursor::Pointer => Cursor::Crosshair,
+        //     Cursor::Crosshair => Cursor::NotAllowed,
+        //     Cursor::NotAllowed => Cursor::ResizeLeftRight,
+        //     Cursor::ResizeLeftRight => Cursor::ResizeUpDown,
+        //     Cursor::ResizeUpDown => {
+        //         if let Some(custom) = &self.custom {
+        //             custom.clone()
+        //         } else {
+        //             Cursor::Arrow
+        //         }
+        //     }
+        //     Cursor::Custom(_) => Cursor::Arrow,
+        //     _ => Cursor::Arrow,
+        // };
     }
 }

@@ -42,6 +42,7 @@ impl Widget<AppState> for BoardPiece {
                         data.winner = Some(data.turn);
                         data.game_state = GameState::GameOver;
                         data.current_view = data.game_state as i32;
+                        data.turn = Players::Unplayed;
                     }
                     data.turn = get_opponent(data.turn);
                     data.captures = data.board.captures;

@@ -24,6 +24,7 @@ impl<W: Widget<AppState>> Controller<AppState, W> for CursorArea {
 
     fn update(
         &mut self,
+
         child: &mut W,
         ctx: &mut UpdateCtx,
         old_data: &AppState,
