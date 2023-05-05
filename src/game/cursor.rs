@@ -5,7 +5,7 @@ use crate::*;
 /// The crucial part of this code is actually making and initialising
 /// the cursor. This happens here. Because we cannot make the cursor
 /// before the window is open we have to do that on `WindowConnected`.
-struct CursorArea;
+pub struct CursorArea;
 
 impl<W: Widget<AppState>> Controller<AppState, W> for CursorArea {
     fn event(
@@ -31,7 +31,7 @@ impl<W: Widget<AppState>> Controller<AppState, W> for CursorArea {
         data: &AppState,
         env: &Env,
     ) {
-        if data.cursor != old_data.cursor {
+        if old_data.cursor != data.cursor {
             ctx.set_cursor(&data.cursor);
         }
         child.update(ctx, old_data, data, env);

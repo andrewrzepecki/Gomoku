@@ -23,11 +23,11 @@ pub struct Board {
 
 impl Board {
     
-    pub fn new(size: usize) -> Board {
+    pub fn new() -> Board {
         Board {
-            size : size,
+            size : BOARDSIZE,
             bpc : 2,
-            bpr : size as u32 * BOARDSIZE as u32,
+            bpr : BOARDSIZE as u32 * BOARDSIZE as u32,
             boards : [0; BOARDSIZE],
             captures : [0; 2],
             free_threes : [0; 2],
@@ -226,7 +226,7 @@ impl Board {
     }
 
     // Expensive function as allocates to heap, could return fixed size array with a limit, board size>?
-    // todo : change return type to static array
+    // todo : change return type to static array make a limit to 6.
     pub fn get_next(&self, number: i32, origin: (usize, usize), neighbor: (usize, usize)) -> impl Iterator<Item = (usize, usize)> {
         let mut next = Vec::new();
         let (dx, dy) = self.get_delta(origin, neighbor);

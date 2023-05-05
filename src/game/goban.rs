@@ -3,19 +3,16 @@ use crate::*;
 pub struct Goban { 
     // Widget child UI elements
     pieces : Vector<BoardPiece>,
-    // Main logic for game and rules
+    cursor_position: Point,
+
 }
 
 impl Goban {
-    pub fn new(size: usize) -> Self {
+    pub fn new() -> Self {
         Self {
-            pieces : build_pieces(size),
+            pieces : build_pieces(BOARDSIZE),
+            cursor_position : Point::new(0.0, 0.0),
         }
-    }
-
-    pub fn dynamic(f: impl Fn(i32) -> i32, arg : i32) -> Self {
-        let size: i32 = f(arg);
-        Goban::new(size as usize)
     }
 }
 
@@ -34,6 +31,9 @@ impl Widget<AppState> for Goban {
         }
         for p in self.pieces.iter_mut() {
             p.event(ctx, event, data, env);
+        }
+        if let Event::MouseMove(event) = event {
+            self.cursor_position = event.pos;
         }
         ctx.request_paint();
     }
@@ -76,10 +76,11 @@ impl Widget<AppState> for Goban {
         }
         
         let mut size = bc.max();
-        
-        if size.height != size.width {
-            size = Size::new(size.height, size.height);
-        }
+        size = if size.height > size.width {
+            Size::new(size.width, size.width)
+        } else {
+            Size::new(size.height, size.height)
+        };
         if bc.is_width_bounded() && bc.is_height_bounded() {
             size
         } else {
@@ -90,12 +91,16 @@ impl Widget<AppState> for Goban {
 
     
     fn paint(&mut self, ctx: &mut PaintCtx, data: &AppState, env: &Env) {
+
+        // Create Board Background
         let size = ctx.size();
         let board = ctx.size().to_rect();
         ctx.clip(board);
         ctx.fill(board, &Color::rgb8(139, 105, 20));
         let x_delta = ctx.size().width / data.board_size as f64;
         let y_delta = ctx.size().height / data.board_size as f64;
+
+        // Create Grid
         for i in 0..data.board_size {
             let x = Point::new(x_delta * (i as f64) + (x_delta / 2.0), 0.0);
             let y = Point::new(x_delta * (i as f64) + (x_delta / 2.0), size.height);
@@ -121,6 +126,15 @@ impl Widget<AppState> for Goban {
         for p in self.pieces.iter_mut() {
             p.paint(ctx, data, env);
         }
+
+        // Create Cursor Piece.
+        let radius = (x_delta + y_delta) / 4.750;
+        let color = match data.turn {
+            Players::Unplayed => Color::TRANSPARENT,
+            Players::PlayerOne => data.colors[data.player_colors[0] as usize],
+            Players::PlayerTwo => data.colors[data.player_colors[1] as usize],
+        };
+        ctx.fill(Circle::new(self.cursor_position, radius), &color);
 
     }
 }

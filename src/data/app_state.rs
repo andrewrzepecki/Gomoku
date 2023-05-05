@@ -38,7 +38,7 @@ impl Default for AppState {
             current_view : GameState::Menu as i32,
 
             board_size : BOARDSIZE,
-            board: Board::new(BOARDSIZE),
+            board: Board::new(),
             turn : Players::PlayerOne,
             captures : [0, 0],
             winner : None,
@@ -79,41 +79,17 @@ impl Default for AppState {
 impl AppState {
     pub fn reset(&mut self) {
         self.last_move_duration = Instant::now().duration_since(Instant::now());
-        self.board = Board::new(BOARDSIZE);
+        self.board = Board::new();
         self.last_move_time = Instant::now();
         self.sugested = None;
         self.turn = Players::PlayerOne;
         self.winner = None;
     }
 
-    pub fn change_cursor(&mut self, player : Players) {
-        
-        if player == Players::PlayerOne {
-            self.cursor = Cursor::Arrow;
-        }
-        else if player == Players::PlayerTwo {
-            self.cursor = Cursor::Crosshair;
-        }
-        else {
-            self.cursor =  Cursor::NotAllowed;
-        }
-
-        // self.cursor = match self.cursor {
-        //     Cursor::Arrow => Cursor::IBeam,
-        //     Cursor::IBeam => Cursor::Pointer,
-        //     Cursor::Pointer => Cursor::Crosshair,
-        //     Cursor::Crosshair => Cursor::NotAllowed,
-        //     Cursor::NotAllowed => Cursor::ResizeLeftRight,
-        //     Cursor::ResizeLeftRight => Cursor::ResizeUpDown,
-        //     Cursor::ResizeUpDown => {
-        //         if let Some(custom) = &self.custom {
-        //             custom.clone()
-        //         } else {
-        //             Cursor::Arrow
-        //         }
-        //     }
-        //     Cursor::Custom(_) => Cursor::Arrow,
-        //     _ => Cursor::Arrow,
-        // };
-    }
+    pub fn change_cursor(&mut self, legal : bool) {
+        self.cursor = match legal {
+            true => Cursor::Arrow,
+            false => Cursor::NotAllowed
+        };
+     }
 }

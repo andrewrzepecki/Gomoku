@@ -1,9 +1,6 @@
 use crate::*;
 
-// Needs argument to define board size:
-//    -> Breaks code pattern, would prefer to be able to give a closure to Goban::new()
-//        -> TODO: implement and test Goban::dynamic()
-pub fn game_view(board_size: usize) -> Flex<AppState> {
+pub fn game_view() -> Flex<AppState> {
 
 
     let settings_button = Button::new("Settings")
@@ -42,7 +39,7 @@ pub fn game_view(board_size: usize) -> Flex<AppState> {
 
     let col = Flex::column()
         .with_flex_child(Label::new("Gomoku").with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE)), 1.0)
-        .with_flex_child(Align::centered(Goban::new(board_size)), 10.0)
+        .with_flex_child(Align::centered(Goban::new().controller(CursorArea {})), 10.0)
         .with_flex_child(game_data_col, 2.0);
     col
 }

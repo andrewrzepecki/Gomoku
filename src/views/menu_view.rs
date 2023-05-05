@@ -12,10 +12,11 @@ pub fn menu_view() -> Flex<AppState> {
         )
         .with_flex_child(
             // top right
-            Label::new("tbc")
+            Goban::new()
                 .center()
-                .background(Color::GRAY)
-                .padding(10.0), 1.0
+                .border(Color::GRAY, 4.0)
+                .padding(10.0)
+            , 1.0
         );
 
     let bottom_pannel = Flex::row()
@@ -28,9 +29,9 @@ pub fn menu_view() -> Flex<AppState> {
             Button::new("PLAY")
             .on_click(
                 |_ctx, data: &mut AppState, _| {
-                    data.board = Board::new(data.board_size);
+                    data.board = Board::new();
                     data.turn = Players::PlayerOne;
-                    data.change_cursor(data.turn);
+                    //data.change_cursor(data.turn);
                     data.game_state = GameState::Game;
                     data.current_view = data.game_state as i32;
                 }
@@ -52,19 +53,7 @@ pub fn menu_view() -> Flex<AppState> {
 
 
 fn menu_pannel() ->  Flex<AppState> {
-    
-    // Create Board Size Picker
-    let board_size_label = Label::new(format!("{:width$}","Board Size", width=20)).with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE));
-    let board_size_value = Label::new(|data: &AppState, _env: &Env| format!("{:width$}",data.board_size.to_string(), width=20)).with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE));
-    let board_size_up_button = Button::new("+")
-        .on_click(|_ctx, data: &mut AppState, _env: &Env| { data.board_size = (data.board_size + 1).clamp(8, 30) });
-    let board_size_down_button = Button::new("-")
-        .on_click(|_ctx, data: &mut AppState, _env: &Env| { data.board_size = (data.board_size - 1).clamp(8, 30) });
-    let board_size_row = Flex::row()
-        .with_flex_child(board_size_label, 1.0)
-        .with_flex_child(board_size_down_button, 1.0)
-        .with_flex_child(board_size_value, 1.0)
-        .with_flex_child(board_size_up_button, 1.0);
+
 
     // Create Game Mode picker.
     let game_mode_label = Label::new(format!("{:width$}","Game Mode", width=20)).with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE));
@@ -127,11 +116,10 @@ fn menu_pannel() ->  Flex<AppState> {
     
     let layout = Flex::column()
         .with_flex_spacer(2.0)
-        .with_flex_child(board_size_row, 1.0)
         .with_flex_child(game_mode_row, 1.0)
         .with_flex_child(player1_color_row, 1.0)
         .with_flex_child(player2_color_row, 1.0);
-        //.padding(Insets::new(200.0, 0.0, 0.0, 0.0));
+        //.center();
     layout
 
 }

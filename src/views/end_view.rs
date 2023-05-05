@@ -46,7 +46,7 @@ pub fn end_view() -> Flex<AppState> {
         )
         .with_flex_child(
             // bottom right
-            Goban::new(BOARDSIZE), 1.0
+            Goban::new(), 1.0
         );
     pannel
 }

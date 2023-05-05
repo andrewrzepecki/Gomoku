@@ -49,6 +49,15 @@ impl Widget<AppState> for BoardPiece {
                 }
             }
         }
+        if let Event::MouseMove(event) = event {
+            if (self.position - event.pos).hypot() <= self.radius {
+                if !data.board.is_legal(self.x, self.y, data.turn) {
+                    data.change_cursor(false);
+                } else {
+                    data.change_cursor(true);
+                }
+            }
+        }
     }
 
     fn lifecycle(
@@ -99,22 +108,6 @@ impl Widget<AppState> for BoardPiece {
         ctx.fill(Circle::new(self.position, self.radius), &color);
     }
 }
-
-// Function to set color of the piece depeding on the AppState.
-//fn get_piece_color(data : &mut AppState, x: usize, y: usize, state: Players) -> Color {
-//    let mut color = Color::TRANSPARENT;
-    //if state != UNPLAYED_STATE {
-    //    color = if state == PLAYER1_STATE {data.colors[data.player_colors[0] as usize]} else {data.colors[data.player_colors[1] as usize]};
-    //}
-    //else {
-    //    color = if !data.board.is_legal_move(x, y, data.turn) {Color::rgba8(255, 0, 0, 50)} else {color};
-    //    if data.sugested != None {
-    //        color = if data.sugested.unwrap().0 == x && data.sugested.unwrap().1 == y {Color::rgba8(0, 255, 0, 50)} else {color};
-    //    }
-    //}
-    //color  
-//}
-
 
 pub fn build_pieces(size : usize) -> Vector<BoardPiece> {
     
