@@ -2,11 +2,6 @@ use crate::*;
 
 
 pub fn main_view() -> impl Widget<AppState> {
-    let mut current_view = Flex::row();
-    current_view.add_child(
-        Label::new(|data: &i32, _env: &Env| format!("Current view: {data}"))
-            .lens(AppState::current_view),
-    );
 
     let view_switcher = ViewSwitcher::new(
         |data: &AppState, _env| data.current_view,
@@ -19,6 +14,5 @@ pub fn main_view() -> impl Widget<AppState> {
     );
 
     Flex::column()
-        .with_child(current_view)
         .with_flex_child(view_switcher, 1.0)
 }

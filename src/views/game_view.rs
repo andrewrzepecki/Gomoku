@@ -20,11 +20,11 @@ pub fn game_view() -> Flex<AppState> {
         ).with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE)), 1.0)
         
         .with_flex_child(Label::new(
-            |data: &AppState, _env: &Env| {format!("Player one captures: {}", data.captures[0])}
+            |data: &AppState, _env: &Env| {format!("Player one captures: {}", data.board.captures[0])}
         ).with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE)), 1.0)
         
         .with_flex_child(Label::new(
-            |data: &AppState, _env: &Env| {format!("Player two captures: {}", data.captures[1])}
+            |data: &AppState, _env: &Env| {format!("Player two captures: {}", data.board.captures[1])}
         )
         .with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE)), 1.0)
         

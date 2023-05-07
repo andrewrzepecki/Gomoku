@@ -9,8 +9,6 @@ pub struct AppState {
     #[data(eq)]
     pub turn : Players,
     #[data(eq)]
-    pub captures : [u64; 2],
-    #[data(eq)]
     pub winner: Option<Players>,
     #[data(eq)]
     pub player_colors : Vec<i32>,
@@ -26,7 +24,7 @@ pub struct AppState {
     pub last_move_duration : Duration,
     pub last_move_time : Instant,
     #[data(eq)]
-    pub is_ai : Vec<bool>,
+    pub is_ai : [bool; 2],
     pub sugested : Option<(i32, i32)>,
 }
 
@@ -40,7 +38,6 @@ impl Default for AppState {
             board_size : BOARDSIZE,
             board: Board::new(),
             turn : Players::PlayerOne,
-            captures : [0, 0],
             winner : None,
             player_colors : vec![0, 1],
             game_state : GameState::Menu,
@@ -70,7 +67,7 @@ impl Default for AppState {
             cursor : Cursor::Arrow,
             last_move_duration : Instant::now().duration_since(Instant::now()),
             last_move_time : Instant::now(),
-            is_ai : Vec::from([false, false]),
+            is_ai : [false, false],
             sugested : None,
         }
     }   
@@ -92,4 +89,18 @@ impl AppState {
             false => Cursor::NotAllowed
         };
      }
+
+    pub fn update_board(&mut self, x: usize, y: usize) {
+        self.last_move_duration = Instant::now().duration_since(self.last_move_time);
+        self.last_move_time = Instant::now();
+        let mut m = BoardMove::new(x, y, self.turn);
+        m.set(&mut self.board);
+        if self.board.move_is_winner(x, y, self.turn) {
+            self.winner = Some(self.turn);
+            self.game_state = GameState::GameOver;
+            self.current_view = self.game_state as i32;
+            self.turn = Players::Unplayed;
+        }
+        self.turn = get_opponent(self.turn);
+    }
 }

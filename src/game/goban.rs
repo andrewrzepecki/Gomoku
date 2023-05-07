@@ -4,7 +4,6 @@ pub struct Goban {
     // Widget child UI elements
     pieces : Vector<BoardPiece>,
     cursor_position: Point,
-
 }
 
 impl Goban {
@@ -24,13 +23,15 @@ impl Widget<AppState> for Goban {
     
     // Main Event Handler for all game changes.
     fn event(&mut self, ctx: &mut EventCtx, event: &Event, data: &mut AppState, env : &Env) {
-        
-        // Give Control to player if User.
-        if data.turn == Players::Unplayed {
-            data.winner = Some(Players::Unplayed);
+
+        if data.turn != Players::Unplayed && data.is_ai[data.turn as usize] {
+             let (x, y) = get_best_move(data);
+             data.update_board(x, y);
         }
-        for p in self.pieces.iter_mut() {
-            p.event(ctx, event, data, env);
+        else {
+            for p in self.pieces.iter_mut() {
+                p.event(ctx, event, data, env);
+            }
         }
         if let Event::MouseMove(event) = event {
             self.cursor_position = event.pos;
@@ -137,12 +138,4 @@ impl Widget<AppState> for Goban {
         ctx.fill(Circle::new(self.cursor_position, radius), &color);
 
     }
-}
-
-pub fn update_board(data: &mut AppState, _m : &mut BoardMove) {
-    data.last_move_duration = Instant::now().duration_since(data.last_move_time);
-    data.last_move_time = Instant::now();
-    // Play Move
-    //m.set(&mut data.board);
-    //data.turn = data.board.get_opponent(data.turn);
 }

@@ -31,6 +31,7 @@ pub fn menu_view() -> Flex<AppState> {
                 |_ctx, data: &mut AppState, _| {
                     data.board = Board::new();
                     data.turn = Players::PlayerOne;
+                    data.is_ai = make_ai(data.game_mode);
                     //data.change_cursor(data.turn);
                     data.game_state = GameState::Game;
                     data.current_view = data.game_state as i32;
@@ -122,4 +123,12 @@ fn menu_pannel() ->  Flex<AppState> {
         //.center();
     layout
 
+}
+
+fn make_ai(mode: GameMode) -> [bool; 2] {
+    match mode {
+        GameMode::PvAI => [false, true],
+        GameMode::PvP => [false, false],
+        GameMode::AIvAI => [true, true]
+    }
 }
