@@ -1,6 +1,5 @@
 use crate::*;
 
-
 #[derive(Clone, Data)]
 pub struct BoardPiece {
     x : usize,
@@ -47,6 +46,7 @@ impl Widget<AppState> for BoardPiece {
                 } else {
                     data.change_cursor(true);
                 }
+                data.candidate_score = get_candidate_score(&mut data.board, self.x, self.x, data.turn);
             }
         }
     }

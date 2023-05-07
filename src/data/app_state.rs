@@ -25,7 +25,9 @@ pub struct AppState {
     pub last_move_time : Instant,
     #[data(eq)]
     pub is_ai : [bool; 2],
-    pub sugested : Option<(i32, i32)>,
+    pub suggested : Option<(i32, i32)>,
+    pub is_test : bool,
+    pub candidate_score: i32,
 }
 
 
@@ -68,17 +70,20 @@ impl Default for AppState {
             last_move_duration : Instant::now().duration_since(Instant::now()),
             last_move_time : Instant::now(),
             is_ai : [false, false],
-            sugested : None,
+            suggested : None,
+            is_test : false,
+            candidate_score : 0,
         }
     }   
 }
 
 impl AppState {
     pub fn reset(&mut self) {
+
         self.last_move_duration = Instant::now().duration_since(Instant::now());
         self.board = Board::new();
         self.last_move_time = Instant::now();
-        self.sugested = None;
+        self.suggested = None;
         self.turn = Players::PlayerOne;
         self.winner = None;
     }
@@ -91,16 +96,19 @@ impl AppState {
      }
 
     pub fn update_board(&mut self, x: usize, y: usize) {
+
         self.last_move_duration = Instant::now().duration_since(self.last_move_time);
         self.last_move_time = Instant::now();
         let mut m = BoardMove::new(x, y, self.turn);
         m.set(&mut self.board);
-        if self.board.move_is_winner(x, y, self.turn) {
+        if self.board.move_is_winner(x, y, self.turn) && !self.is_test {
             self.winner = Some(self.turn);
             self.game_state = GameState::GameOver;
             self.current_view = self.game_state as i32;
             self.turn = Players::Unplayed;
         }
-        self.turn = get_opponent(self.turn);
+        if !self.is_test {
+            self.turn = get_opponent(self.turn);
+        }
     }
 }

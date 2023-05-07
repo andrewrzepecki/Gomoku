@@ -1,5 +1,68 @@
 #[cfg(test)]
-pub mod tests {
+pub mod score_tests {
+
+    extern crate gomoku;
+
+    use gomoku::*;
+
+    pub fn test_view() -> impl Widget<AppState> {
+        let game_data_col = Flex::column()
+            .with_flex_child(Label::new(
+                |data: &AppState, _env: &Env| {format!("Current Player: {}", data.color_names[if data.turn == Players::PlayerOne {data.player_colors[0] as usize} else {data.player_colors[1] as usize}])}
+            ).with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE)), 1.0)
+
+            .with_flex_child(Label::new(
+                |data: &AppState, _env: &Env| {format!("Candidate Score: {}", data.candidate_score)}
+            ).with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE)), 1.0)
+
+            .with_flex_child( Button::new("P1")
+                .on_click(
+                    |_ctx, data: &mut AppState, _| {
+                        // Reset AppState & launch new window.
+                        data.turn = Players::PlayerOne;
+                    }
+                ), 1.0)
+            .with_flex_child( Button::new("P2")
+                  .on_click(
+                      |_ctx, data: &mut AppState, _| {
+                          // Reset AppState & launch new window.
+                          data.turn = Players::PlayerTwo;
+                      }
+                  ), 1.0)
+        .with_flex_child( Button::new("Reset")
+                  .on_click(
+                      |_ctx, data: &mut AppState, _| {
+                          // Reset AppState & launch new window.
+                          data.reset();
+                      }
+                  ), 1.0);
+        let col = Flex::column()
+            .with_flex_child(Label::new("Gomoku").with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE)), 1.0)
+            .with_flex_child(Align::centered(Goban::new().controller(CursorArea {})), 10.0)
+            .with_flex_child(game_data_col, 2.0);
+        col
+    }
+
+    #[test]
+    pub fn score_tests() {
+        let mut initial_state = AppState::default();
+        initial_state.game_mode = GameMode::PvP;
+        initial_state.is_test = true;
+
+        let window = WindowDesc::new(test_view())
+            .title(LocalizedString::new("Gomoku Score Testing"))
+            .window_size(Size::new(600.0, 450.0));
+
+        AppLauncher::with_window(window)
+            .log_to_console()
+            .launch(initial_state)
+            .expect("launch failed");
+    }
+}
+
+
+#[cfg(test)]
+pub mod board_tests {
 
     extern crate gomoku;
 
