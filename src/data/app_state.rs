@@ -28,6 +28,7 @@ pub struct AppState {
     pub suggested : Option<(i32, i32)>,
     pub is_test : bool,
     pub candidate_score: i32,
+    pub is_playing : bool,
 }
 
 
@@ -73,6 +74,7 @@ impl Default for AppState {
             suggested : None,
             is_test : false,
             candidate_score : 0,
+            is_playing : false,
         }
     }   
 }
@@ -86,6 +88,7 @@ impl AppState {
         self.suggested = None;
         self.turn = Players::PlayerOne;
         self.winner = None;
+        self.is_playing = false;
     }
 
     pub fn change_cursor(&mut self, legal : bool) {

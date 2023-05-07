@@ -46,7 +46,7 @@ impl Widget<AppState> for BoardPiece {
                 } else {
                     data.change_cursor(true);
                 }
-                data.candidate_score = get_candidate_score(&mut data.board, self.x, self.x, data.turn);
+                data.candidate_score = get_candidate_score(&mut data.board, self.x, self.y, data.turn);
             }
         }
     }

@@ -14,6 +14,8 @@ pub struct Board {
     #[data(eq)]
     pub captures : [u64; 2],
     #[data(eq)]
+    pub winner : Players,
+    #[data(eq)]
     pub pattern_table : HashMap<String, HashMap<u64, (usize, i32, bool)>>,
     #[data(eq)]
     pub inverted_table : HashMap<String, HashMap<u64, (usize, i32, bool)>>,
@@ -28,6 +30,7 @@ impl Board {
             bpr : BOARDSIZE as u32 * BOARDSIZE as u32,
             boards : [0; BOARDSIZE],
             captures : [0; 2],
+            winner : Players::Unplayed,
             pattern_table : make_pattern_table(),
             inverted_table : make_inverted_table(),
         }

@@ -25,7 +25,7 @@ impl Widget<AppState> for Goban {
     fn event(&mut self, ctx: &mut EventCtx, event: &Event, data: &mut AppState, env : &Env) {
 
         if data.turn != Players::Unplayed && data.is_ai[data.turn as usize] {
-             let (x, y) = get_best_move(data);
+             let (x, y) = get_best_move(&mut data.board, data.turn);
              data.update_board(x, y);
         }
         else {

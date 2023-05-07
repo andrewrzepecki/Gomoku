@@ -9,6 +9,7 @@ pub struct BoardMove {
     pub to_remove: [[i8; 2]; 2],
     pub set : bool,
     pub score : i32,
+    pub is_winner : bool,
 }
 
 impl BoardMove {
@@ -20,6 +21,7 @@ impl BoardMove {
             to_remove : [[-1i8; 2]; 2],
             set : false,
             score : 0,
+            is_winner : false,
         }
     }
 
@@ -31,6 +33,10 @@ impl BoardMove {
                     board.set_state(add[0] as usize, add[1] as usize, Players::Unplayed);
                     board.captures[self.player as usize] += 1;
                 }
+            }
+            if board.move_is_winner(self.x, self.y, self.player) {
+                board.winner = self.player;
+                self.is_winner = true;
             }
             board.set_state(self.x, self.y, self.player);
             self.set = true;
@@ -44,6 +50,10 @@ impl BoardMove {
                     board.set_state(add[0] as usize, add[1] as usize, get_opponent(self.player));
                     board.captures[self.player as usize] -= 1;
                 }
+            }
+            if self.is_winner {
+                board.winner = Players::Unplayed;
+                self.is_winner = false;
             }
             board.set_state(self.x, self.y, Players::Unplayed);
             self.set = false;

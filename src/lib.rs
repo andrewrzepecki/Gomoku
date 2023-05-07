@@ -49,8 +49,8 @@ pub const BOARDSIZE : usize = 19;
 pub const MAX_CAPTURES : i32 = 10;
 
 // Algorithm HyperParameters.
-pub const DEPTH : usize = 2;
-pub const CANDIDATE_SELECT : usize = 3;
+pub const DEPTH : usize = 4;
+pub const CANDIDATE_SELECT : usize = 5;
 pub const OPPONENT_WEIGHT : f64 = 1.00;
 pub const DEFENSE_WEIGHT : f64 = 1.10;
 
