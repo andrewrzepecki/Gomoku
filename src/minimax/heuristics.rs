@@ -48,6 +48,7 @@ pub fn get_candidate_score(board: &mut Board, x: usize, y: usize, player: Player
     total
 }
 
+
 pub fn get_candidate_moves(board: &mut Board, player: Players) -> [(usize, usize, i32); CANDIDATE_SELECT] {
 
     let mut tmp_moves = Vec::new();
@@ -65,6 +66,7 @@ pub fn get_candidate_moves(board: &mut Board, player: Players) -> [(usize, usize
             }
         }
     }
+    // Protect stack array return length (if under CANDIDATE_SELECT add randoms)
     tmp_moves.sort_by(|a, b| b.2.cmp(&a.2));
     let mut moves: [(usize, usize, i32); CANDIDATE_SELECT] = tmp_moves
         .into_iter()

@@ -80,6 +80,7 @@ pub fn make_pattern_table() -> HashMap<String, HashMap<u64, (usize, i32, bool)>>
 
     // Five in a row
     score_map.insert(341 as u64, (5 as usize, 100000 as i32, false));
+    score_map.insert(85 as u64, (5 as usize, 100000 as i32, true));
     hmap.insert("score_table".into(), score_map);
 
     hmap

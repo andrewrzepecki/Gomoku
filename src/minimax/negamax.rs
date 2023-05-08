@@ -10,6 +10,12 @@ pub fn alpha_beta_negamax(
 
     // Return Score
     if depth == 0 || board.winner != Players::Unplayed {
+        if board.winner == player {
+            return (42, 42, 100000);
+        }
+        else if board.winner != Players::Unplayed {
+            return (42, 42, -100000);
+        }
         let score = get_board_score(board, player);
         return (42, 42, score);
     }
