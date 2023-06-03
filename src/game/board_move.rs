@@ -27,16 +27,18 @@ impl BoardMove {
 
     pub fn set(&mut self, board: &mut Board) {
         if !self.set {
-            self.to_remove = board.return_captured(self.x, self.y, self.player);
-            for add in self.to_remove {
-                if add[0] != -1 {
-                    board.set_state(add[0] as usize, add[1] as usize, Players::Unplayed);
-                    board.captures[self.player as usize] += 1;
+            if self.player != Players::Unplayed {
+                self.to_remove = board.return_captured(self.x, self.y, self.player);
+                for add in self.to_remove {
+                    if add[0] != -1 {
+                        board.set_state(add[0] as usize, add[1] as usize, Players::Unplayed);
+                        board.captures[self.player as usize] += 1;
+                    }
                 }
-            }
-            if board.move_is_winner(self.x, self.y, self.player) {
-                board.winner = self.player;
-                self.is_winner = true;
+                if board.move_is_winner(self.x, self.y, self.player) {
+                    board.winner = self.player;
+                    self.is_winner = true;
+                }
             }
             board.set_state(self.x, self.y, self.player);
             self.set = true;

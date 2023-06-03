@@ -1,3 +1,4 @@
+use rand::Rng;
 use crate::*;
 /*
     Main evaluate board heuristics: Add score for each pattern on board.
@@ -5,8 +6,10 @@ use crate::*;
 
 // Final Board Score
 pub fn get_board_score(board: &mut Board, player : Players) -> i32 {
+    let opp = get_opponent(player);
     let patterns = &(*board.get_player_patterns(player))["score_table"];
-    let score = board.scan_board(patterns, player) + capture_score(board, player);
+    let opp_patterns = &(*board.get_player_patterns(opp))["score_table"];
+    let score = board.scan_board(patterns, player) - ((board.scan_board(opp_patterns, opp) as f64 * OPPONENT_WEIGHT) as i32) + capture_score(board, player);
     score
 }
 
@@ -21,15 +24,23 @@ pub fn get_candidate_score(board: &mut Board, x: usize, y: usize, player: Player
     let mut total = 0;
     for n in board.get_neighbors(x, y) {
         let mut r_count = 0;
-        if board.get_state(n.0, n.1) == player {
-            r_count += 1;
+        let mut b_count = 0;
+        let n_state = board.get_state(n.0, n.1);
+        if n_state == player  || n_state == Players::Unplayed {
+            match n_state {
+                 Players::Unplayed => b_count += 1,
+                _ => r_count += 1,
+            };
             for (nx, ny) in board.get_next(5, (x, y), n) {
                 if board.is_valid(nx, ny) {
                     let state = board.get_state(nx, ny);
-                    if state != player {
+                    if state == Players::Unplayed && b_count < 1 {
+                        b_count += 1;
+                    } else if state != player {
                         break;
+                    } else {
+                        r_count += 1;
                     }
-                    r_count += 1;
                 }
             }
         }
@@ -48,33 +59,61 @@ pub fn get_candidate_score(board: &mut Board, x: usize, y: usize, player: Player
     total
 }
 
+pub fn get_random_coords() -> (usize, usize, i32) {
+    let mut rng = rand::thread_rng();
+    let x = rng.gen_range(0..BOARDSIZE-1);
+    let y = rng.gen_range(0..BOARDSIZE-1);
+    (x, y, -1)
+}
 
-pub fn get_candidate_moves(board: &mut Board, player: Players) -> [(usize, usize, i32); CANDIDATE_SELECT] {
+pub fn get_n_random_candidates(board: &mut Board, player: Players, n: usize) -> Vec<(usize, usize, i32)> {
 
-    let mut tmp_moves = Vec::new();
+    let mut randoms = Vec::new();
+    let mut flag = true;
+    while flag {
+        let (x, y, score) = get_random_coords();
+        if board.move_is_legal(x, y, player)
+            && !randoms.iter().any(|v| *v == (x, y, score)) {
+            randoms.push((x, y, score));
+        }
+        if randoms.len() >= n {
+            flag = false;
+            break;
+        }
+    }
+    randoms
+}
 
-    // Try All Adjacent
+fn get_adjacent(board: &mut Board, player: Players) -> Vec<(usize, usize, i32)> {
+
+    let mut moves = Vec::new();
+    // Score All Adjacent + 1
     for x in 0..board.size {
         for y in 0..board.size {
-            if board.move_is_legal(x, y, player) {
-                  for (nx, ny) in board.get_neighbors(x, y) {
-                      if board.get_state(nx, ny) != Players::Unplayed {
-                          tmp_moves.push((x, y, get_candidate_score(board, x, y, player).max(get_candidate_score(board, x, y, get_opponent(player)))));
-                          break;
-                      }
-                  }
+            for (nx, ny) in board.get_neighbors(x, y) {
+                if board.get_state(nx, ny) != Players::Unplayed && board.move_is_legal(x, y, player) {
+                    moves.push((x, y, get_candidate_score(board, x, y, player).max(get_candidate_score(board, x, y, get_opponent(player)))));
+                }
             }
         }
     }
-    // Protect stack array return length (if under CANDIDATE_SELECT add randoms)
-    tmp_moves.sort_by(|a, b| b.2.cmp(&a.2));
-    let mut moves: [(usize, usize, i32); CANDIDATE_SELECT] = tmp_moves
-        .into_iter()
-        .take(CANDIDATE_SELECT)
-        .map(|(x, y, score)| (x, y, score))
-        .collect::<Vec<(usize, usize, i32)>>()
-        .try_into()
-        .unwrap();
+    moves
+}
 
+
+pub fn get_candidate_moves(board: &mut Board, player: Players) -> [(usize, usize, i32); CANDIDATE_SELECT] {
+
+    let mut moves = [(42usize, 42usize, -1i32); CANDIDATE_SELECT];
+    let mut tmp_moves = get_adjacent(board, player);
+
+    // Sort adjacent candidates...
+    tmp_moves.sort_by(|a, b| b.2.cmp(&a.2));
+    let len = tmp_moves.len();
+    let random_move = get_n_random_candidates(board, player, 1);
+    for i in 0..CANDIDATE_SELECT - 1 {
+        if i < len { moves[i] = tmp_moves[i]; }
+    }
+    let index = if len < CANDIDATE_SELECT { len } else { CANDIDATE_SELECT - 1 };
+    moves[index] = random_move[0];
     return moves;
 }

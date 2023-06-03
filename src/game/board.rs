@@ -16,9 +16,9 @@ pub struct Board {
     #[data(eq)]
     pub winner : Players,
     #[data(eq)]
-    pub pattern_table : HashMap<String, HashMap<u64, (usize, i32, bool)>>,
+    pub pattern_table : HashMap<String, HashMap<String, (u64, usize, bool, i32)>>,
     #[data(eq)]
-    pub inverted_table : HashMap<String, HashMap<u64, (usize, i32, bool)>>,
+    pub inverted_table : HashMap<String, HashMap<String, (u64, usize, bool, i32)>>,
 }
 
 impl Board {
@@ -52,7 +52,7 @@ impl Board {
         set_u64_state(&mut self.boards[y], x, player);
     }
 
-    pub fn get_player_patterns(&self, player: Players) -> &HashMap<String, HashMap<u64, (usize, i32, bool)>> {
+    pub fn get_player_patterns(&self, player: Players) -> &HashMap<String, HashMap<String, (u64, usize,  bool, i32)>> {
         match player {
             Players::PlayerOne => &self.pattern_table,
             Players::PlayerTwo => &self.inverted_table,
@@ -172,6 +172,7 @@ impl Board {
                         i += 1;
                     }
                     if is_match && i == len {
+                        i = 0;
                         count += 1;
                     }
                 }
@@ -180,13 +181,13 @@ impl Board {
         count
     }
     
-    pub fn scan_board(&self, patterns: &HashMap<u64, (usize, i32, bool)>, player: Players) -> i32 {
+    pub fn scan_board(&self, patterns: &HashMap<String, (u64, usize, bool, i32)>, player: Players) -> i32 {
         let mut total_score = 0.0;
         
         for x in 0..self.size {
             for y in 0..self.size {
                 if self.get_state(x, y) == player {
-                    for (pattern, (len, score, is_live)) in patterns {
+                    for (_, (pattern, len, is_live, score)) in patterns {
                         let count = self.scan_position(x, y, *pattern, *len, *is_live);
                         let mut sym_pattern = *pattern;
                         let mut sym_len = *len;

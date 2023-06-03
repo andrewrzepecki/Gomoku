@@ -50,8 +50,8 @@ pub const MAX_CAPTURES : i32 = 10;
 
 // Algorithm HyperParameters.
 pub const DEPTH : usize = 6;
-pub const CANDIDATE_SELECT : usize = 4;
-pub const OPPONENT_WEIGHT : f64 = 1.00;
+pub const CANDIDATE_SELECT : usize = 6;
+pub const OPPONENT_WEIGHT : f64 = 0.75;
 pub const DEFENSE_WEIGHT : f64 = 1.10;
 
 // Bitboard pattern numbers

@@ -29,6 +29,7 @@ pub struct AppState {
     pub is_test : bool,
     pub candidate_score: i32,
     pub is_playing : bool,
+    pub board_score : i32,
 }
 
 
@@ -75,6 +76,7 @@ impl Default for AppState {
             is_test : false,
             candidate_score : 0,
             is_playing : false,
+            board_score : 0,
         }
     }   
 }
@@ -104,14 +106,20 @@ impl AppState {
         self.last_move_time = Instant::now();
         let mut m = BoardMove::new(x, y, self.turn);
         m.set(&mut self.board);
-        if self.board.move_is_winner(x, y, self.turn) && !self.is_test {
-            self.winner = Some(self.turn);
-            self.game_state = GameState::GameOver;
-            self.current_view = self.game_state as i32;
-            self.turn = Players::Unplayed;
-        }
         if !self.is_test {
+            if self.board.move_is_winner(x, y, self.turn) && !self.is_test {
+                self.winner = Some(self.turn);
+                self.game_state = GameState::GameOver;
+                self.current_view = self.game_state as i32;
+                self.turn = Players::Unplayed;
+            }
+
             self.turn = get_opponent(self.turn);
+        }
+        else {
+            if self.turn != Players::Unplayed {
+                self.board_score = get_board_score(&mut self.board, self.turn);
+            }
         }
     }
 }

@@ -12,6 +12,10 @@ pub fn get_u64_state(pattern: u64, idx: usize) -> Players {
 }
 
 pub fn set_u64_state(pattern: &mut u64, idx: usize, to_set: Players) {
+    // Make sure bit shifting operations are done on a 00 index.
+    if to_set != Players::Unplayed {
+        set_u64_state(pattern, idx, Players::Unplayed);
+    }
     let bit_pos = idx as u32 * 2;
     let ts = match to_set {
         Players::PlayerOne => 1u64,
@@ -47,40 +51,60 @@ pub fn invert_pattern(pattern: u64, len: usize) -> u64 {
     inverted
 }
 
-pub fn make_inverted_table() -> HashMap<String, HashMap<u64, (usize, i32, bool)>> {
+pub fn make_inverted_table() -> HashMap<String, HashMap<String, (u64, usize, bool, i32)>> {
     let pattern_table = make_pattern_table();
     let mut inverted = HashMap::new();
     for (name, map) in &pattern_table {
         let mut imap = HashMap::new();
-        for (pattern, (len, score, is_live)) in map {
-            imap.insert(invert_pattern(*pattern, *len), (*len, *score, *is_live));
+        for (pattern_name, (pattern, len, is_live, score)) in map {
+            imap.insert((*pattern_name).clone().into(), (invert_pattern(*pattern, *len), *len, *is_live, *score));
         }
         inverted.insert((*name).clone().into(), imap);
     }
     inverted 
 }
 
-pub fn make_pattern_table() -> HashMap<String, HashMap<u64, (usize, i32, bool)>> {
+// Patterns as follow:
+pub fn make_pattern_table() -> HashMap<String, HashMap<String, (u64, usize, bool, i32)>> {
     let mut hmap = HashMap::new();
 
-    // Make Illegal Three patterns
+    // Make Illegal Three patterns [pattern_name: (pattern, size, is_live, score)]
     let mut free_three_map = HashMap::new();
-    free_three_map.insert(21 as u64, (4 as usize, 1 as i32, true));
-    free_three_map.insert(81 as u64, (5 as usize, 1 as i32, true));
-    // free_three_map.insert(324 as u64, (5 as usize, 1 as i32, true));
+    free_three_map.insert("_three".into(), (21 as u64, 4 as usize, true, 1 as i32));
+    free_three_map.insert("open_three_1".into(), (69 as u64, 5 as usize, true, 1 as i32));
     hmap.insert("free_threes".into(), free_three_map);
 
     // Five in a row pattern
     let mut five_map = HashMap::new();
-    five_map.insert(341 as u64, (5 as usize, 1 as i32, false));
+    five_map.insert("winner_pattern".into(), (341 as u64, 5 as usize, false, 1 as i32));
     hmap.insert("five_in_a_row".into(), five_map);
 
     // Pattern Table for table scoring
     let mut score_map = HashMap::new();
+    score_map.insert("winner_pattern".into(), (341 as u64, 5 as usize, false, 100000 as i32));
 
-    // Five in a row
-    score_map.insert(341 as u64, (5 as usize, 100000 as i32, false));
-    score_map.insert(85 as u64, (5 as usize, 100000 as i32, true));
+    score_map.insert("live_four".into(), (85 as u64, 5 as usize, true, 100000 as i32));
+    score_map.insert("dead_four_0".into(), (85 as u64, 5 as usize, false, 30000 as i32));
+    score_map.insert("dead_four_1".into(), (337 as u64, 6 as usize, true, 30000 as i32));
+    score_map.insert("dead_four_2".into(), (325 as u64, 6 as usize, true, 30000 as i32));
+
+    score_map.insert("live_three".into(), (21 as u64, 4 as usize, true, 10000 as i32));
+    score_map.insert("dead_three_0".into(), (81 as u64, 5 as usize, true, 1000 as i32));
+    score_map.insert("dead_three_1".into(), (21 as u64, 4 as usize, false, 1000 as i32));
+    score_map.insert("dead_three_2".into(), (81 as u64, 5 as usize, false, 1000 as i32));
+    score_map.insert("dead_three_3".into(), (69 as u64, 5 as usize, false, 1000 as i32));
+    score_map.insert("dead_three_4".into(), (321 as u64, 6 as usize, true, 1000 as i32));
+    score_map.insert("dead_three_5".into(), (273 as u64, 6 as usize, true, 1000 as i32));
+    score_map.insert("dead_three_5".into(), (2132 as u64, 6 as usize, false, 1000 as i32));
+
+    score_map.insert("live_two_0".into(), (257 as u64, 6 as usize, true, 500 as i32));
+    score_map.insert("live_two_1".into(), (65 as u64, 5 as usize, true, 500 as i32));
+    score_map.insert("live_two_2".into(), (17 as u64, 4 as usize, true, 500 as i32));
+    score_map.insert("live_two_3".into(), (5 as u64, 3 as usize, true, 100 as i32));
+    score_map.insert("dead_two_0".into(), (5 as u64, 3 as usize, false, 100 as i32));
+    score_map.insert("dead_two_1".into(), (17 as u64, 4 as usize, false, 100 as i32));
+    score_map.insert("dead_two_2".into(), (65 as u64, 5 as usize, false, 100 as i32));
+
     hmap.insert("score_table".into(), score_map);
 
     hmap

@@ -10,12 +10,6 @@ pub fn alpha_beta_negamax(
 
     // Return Score
     if depth == 0 || board.winner != Players::Unplayed {
-        if board.winner == player {
-            return (42, 42, 100000);
-        }
-        else if board.winner != Players::Unplayed {
-            return (42, 42, -100000);
-        }
         let score = get_board_score(board, player);
         return (42, 42, score);
     }
@@ -24,9 +18,15 @@ pub fn alpha_beta_negamax(
 
     // Get moves in order.
     for (x, y, _) in get_candidate_moves(board, player) {
+
         // Play the move
+        if x == y && x == 42 { continue }
         let mut m = BoardMove::new(x, y, player);
         m.set(board);
+        if m.is_winner {
+            m.unset(board);
+            return (m.x, m.y, 200000 as i32);
+        }
 
         // Evaluate the move recursively
         let (_, _, score) = alpha_beta_negamax(

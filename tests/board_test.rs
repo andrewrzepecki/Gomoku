@@ -15,17 +15,27 @@ pub mod score_tests {
                 |data: &AppState, _env: &Env| {format!("Candidate Score: {}", data.candidate_score)}
             ).with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE)), 1.0)
 
-            .with_flex_child( Button::new("P1")
+            .with_flex_child(Label::new(
+                |data: &AppState, _env: &Env| {format!("Board Score: {}", data.board_score)}
+            ).with_font(druid::FontDescriptor::new(druid::FontFamily::MONOSPACE)), 1.0)
+
+            .with_flex_child( Button::new("Un")
                 .on_click(
                     |_ctx, data: &mut AppState, _| {
                         // Reset AppState & launch new window.
-                        data.turn = Players::PlayerOne;
+                        data.turn = Players::Unplayed;
                     }
                 ), 1.0)
+            .with_flex_child( Button::new("P1")
+                                  .on_click(
+                                      |_ctx, data: &mut AppState, _| {
+                                          // Reset AppState & launch new window.
+                                          data.turn = Players::PlayerOne;
+                                      }
+                                  ), 1.0)
             .with_flex_child( Button::new("P2")
                   .on_click(
                       |_ctx, data: &mut AppState, _| {
-                          // Reset AppState & launch new window.
                           data.turn = Players::PlayerTwo;
                       }
                   ), 1.0)
@@ -66,6 +76,7 @@ pub mod board_tests {
 
     extern crate gomoku;
 
+    use druid::platform_menus::win::file::print_preview;
     use gomoku::*;
 
 
@@ -116,7 +127,20 @@ pub mod board_tests {
 
         let found = board.scan_position(1, 0, pattern, len, true);
         assert_eq!(found, 1);
-        board.print();
+        board.set_state(0, 0, Players::PlayerTwo);
+        let found = board.scan_position(1, 0, pattern, len, true);
+        assert_eq!(found, 0);
+        board.set_state(0, 0, Players::PlayerOne);
+        let found = board.scan_position(1, 0, pattern, len, true);
+        assert_eq!(found, 0);
+        println!("inverted winner: {:?}", board.inverted_table["five_in_a_row"]["winner_pattern"])
+    }
+
+    #[test]
+    pub fn test_random() {
+        let mut board = Board::new();
+        let (x, y, _) = get_random_coords();
+        println!("{}, {}", x, y);
     }
 
 } 
