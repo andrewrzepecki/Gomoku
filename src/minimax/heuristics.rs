@@ -1,5 +1,6 @@
 use rand::Rng;
 use crate::*;
+
 /*
     Main evaluate board heuristics: Add score for each pattern on board.
 */
